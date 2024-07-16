@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:id="@+id/lay_toolbar"
+        android:orientation="horizontal"
+        android:background="@color/toolbar_bg_color"
+        android:layout_width="match_parent"
+        android:layout_height="40dp">
+        <ImageView
+            android:id="@+id/btn_back"
+            android:src="@drawable/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+        <com.radaee.pen.RDColorOvalView
+            android:id="@+id/btn_bg_color"
+            android:layout_toRightOf="@id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+        <com.radaee.pen.RDColorOvalView
+            android:id="@+id/btn_fore_color"
+            android:layout_toRightOf="@id/btn_bg_color"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+        <ImageView
+            android:id="@+id/btn_done"
+            android:src="@drawable/btn_done"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/lay_backgound"
+        android:padding="10dp"
+        android:background="#FF8080C0"
+        android:layout_below="@id/lay_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+        <TextView
+            android:text="Background Preview:"
+            android:height="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <com.radaee.pen.RDBGView
+            android:layout_marginTop="20dp"
+            android:id="@+id/vw_background"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"/>
+    </RelativeLayout>
+    <com.radaee.pen.RDBGGridView
+        android:id="@+id/grid_list"
+        android:layout_below="@id/lay_backgound"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.radaee.reader.PDFLayoutView
+        android:id="@+id/pdf_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"></com.radaee.reader.PDFLayoutView>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        style="@style/ProgressBar" />
+    <LinearLayout
+        android:id="@+id/text_select_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#99AAAAAA"
+        android:padding="5dp"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/icon_copy"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_copy"
+            android:layout_weight="1"/>
+        <ImageView
+            android:id="@+id/icon_highlight"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_highlight"
+            android:layout_weight="1"/>
+        <ImageView
+            android:id="@+id/icon_underline"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_underline"
+            android:layout_weight="1"/>
+        <ImageView
+            android:id="@+id/icon_strikeout"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_strikeout"
+            android:layout_weight="1"/>
+        <ImageView
+            android:id="@+id/icon_squiggly"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_squiggly"
+            android:layout_weight="1"/>
+        <ImageView
+            android:id="@+id/icon_eraser"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_eraser"
+            android:layout_weight="1"/>
+    </LinearLayout>
+</RelativeLayout>

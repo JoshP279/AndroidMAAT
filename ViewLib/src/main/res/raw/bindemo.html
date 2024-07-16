@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>PDF Pages</title>
+        <link
+                rel="stylesheet"
+                href="rddoc.css" />
+        <script
+                type="text/javascript"
+                src="rdfunc_bin.js"></script>
+    </head>
+    <body bgcolor="#cccccc">
+        <div>
+            <input
+                    type="button"
+                    value="+"
+                    onclick="zoomIn();" />
+            <input
+                    type="button"
+                    value="-"
+                    onclick="zoomOut();" />
+            <input
+                    type="button"
+                    value="|<"
+                    onclick="firstPage();" />
+            <input
+                    type="button"
+                    value="<"
+                    onclick="prevPage();" />
+            <input
+                    type="button"
+                    value=">"
+                    onclick="nextPage();" />
+            <input
+                    type="button"
+                    value=">|"
+                    onclick="lastPage();" />
+        </div>
+
+        <div style="position:absolute;left:0px;top:50px;background:#fff">
+            <canvas id="canvas"></canvas>
+            <div id="panel"></div>
+        </div>
+
+        <script type="text/javascript">
+var pg_no = 0;
+var pg_cnt = 0;
+var pg_zoom = 1.0;
+var pix_size = 2.0;
+
+var breq = new XMLHttpRequest();
+var istr;
+//breq.open('GET', "http://127.0.0.1/data.png", true);
+breq.open('GET', "rddata.png", true);//can use relative path from server.
+breq.responseType = 'blob';
+breq.send();
+breq.onload = function()
+{
+    var reader = new FileReader();
+    reader.readAsArrayBuffer(breq.response);
+    reader.onload = function(e)
+    {
+        istr = {
+	        m_buf:new Uint8Array(e.target.result),
+	        m_pos:0,
+	        read_i32:function()
+	        {
+				var spos = this.m_pos;
+				this.m_pos += 4;
+				return (this.m_buf[spos + 3] << 24) | (this.m_buf[spos + 2] << 16) | (this.m_buf[spos + 1] << 8) | this.m_buf[spos];
+	        },
+	        read_i16:function()
+	        {
+				var spos = this.m_pos++;
+				var hbyte = this.m_buf[this.m_pos++];
+				if(hbyte > 127) hbyte -= 256;
+				return (hbyte << 8) | this.m_buf[spos];
+	        },
+	        read_u16:function()
+	        {
+				var spos = this.m_pos;
+				this.m_pos += 2;
+				return (this.m_buf[spos + 1] << 8) | this.m_buf[spos];
+	        },
+	        read_u8:function()
+	        {
+				return this.m_buf[this.m_pos++];
+	        },
+	        read_utf8:function()
+	        {
+				var send = this.m_pos + ((this.m_buf[this.m_pos + 1] << 8) | this.m_buf[this.m_pos]) + 2;
+			    var sval = "";
+			    this.m_pos += 2;
+			    while(this.m_pos < send)
+			    {
+				    c = this.m_buf[this.m_pos++];
+				    switch(c >> 4)
+				    { 
+				    case 12: case 13:
+				        c2 = this.m_buf[this.m_pos++];
+				        sval += String.fromCharCode(((c & 0x1F) << 6) | (c2 & 0x3F));
+				        break;
+				    case 14:
+				        c2 = this.m_buf[this.m_pos++];
+				        c3 = this.m_buf[this.m_pos++];
+				        sval += String.fromCharCode(((c & 0x0F) << 12) |
+				                       ((c2 & 0x3F) << 6) |
+				                       ((c3 & 0x3F) << 0));
+				        break;
+				    default:
+				        sval += String.fromCharCode(c);
+				        break;
+				    }
+			    }
+			    return sval;
+            },
+	        read_utf16:function()//consider that no unicode is ucs4
+	        {
+				var send = this.m_pos + ((this.m_buf[this.m_pos + 1] << 8) | this.m_buf[this.m_pos]) + 2;
+			    var sval = "";
+			    this.m_pos += 2;
+			    while(this.m_pos < send)
+			    {
+			        sval += String.fromCharCode(this.read_u16());
+			    }
+			    return sval;
+            },
+            seek:function(spos)
+            {
+            	this.m_pos = spos;
+            }
+        };
+        istr.m_len = istr.m_buf.length;
+        load_doc(istr);
+        pg_cnt = refs_cnt;
+        draw_page(istr, pg_no, "canvas", "panel", pg_zoom, pix_size);
+    };
+};
+
+
+function zoomIn() {
+    var zoom = pg_zoom * 1.25;
+    if(zoom > 3) zoom = 3;
+    if(zoom == pg_zoom) return;
+    pg_zoom = zoom;
+    draw_page(istr, pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function zoomOut() {
+    zoom = pg_zoom * 0.8;
+    if(zoom < 0.3) zoom = 0.3;
+    if(zoom == pg_zoom) return;
+    pg_zoom = zoom;
+    draw_page(istr, pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function firstPage() {
+	pg_no = 0;
+	draw_page(istr, pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function prevPage() {
+	if(pg_no <= 0) return;
+	pg_no--;
+	draw_page(istr, pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function nextPage() {
+	if(pg_no >= pg_cnt - 1) return;
+	pg_no++;
+	draw_page(istr, pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function lastPage() {
+	pg_no = pg_cnt-1;
+	draw_page(istr, pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function gotoPage(pgno) {
+	pg_no = pgno;
+	if(pg_no < 0) pg_no = 0;
+	if(pg_no >= pg_cnt) pg_no = pg_cnt - 1;
+}
+
+
+        </script>
+
+    </body>
+</html>

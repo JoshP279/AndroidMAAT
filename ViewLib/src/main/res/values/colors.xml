@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="toolbar_bg_color">#80C0C0C0</color>
+    <color name="annot_menu_bg_color">#202020</color>
+    <color name="btn_pressed_color">#80FF8000</color>
+    <color name="btn_disabled_color">#80888888</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+</resources>

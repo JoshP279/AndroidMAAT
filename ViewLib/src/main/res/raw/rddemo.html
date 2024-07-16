@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>PDF Pages</title>
+        <link
+                rel="stylesheet"
+                href="rddoc.css" />
+        <script
+                type="text/javascript"
+                src="rddata.js"></script>
+        <script
+                type="text/javascript"
+                src="rdfunc.js"></script>
+    </head>
+    <body bgcolor="#cccccc">
+        <div>
+            <input
+                    type="button"
+                    value="+"
+                    onclick="zoomIn();" />
+            <input
+                    type="button"
+                    value="-"
+                    onclick="zoomOut();" />
+            <input
+                    type="button"
+                    value="|<"
+                    onclick="firstPage();" />
+            <input
+                    type="button"
+                    value="<"
+                    onclick="prevPage();" />
+            <input
+                    type="button"
+                    value=">"
+                    onclick="nextPage();" />
+            <input
+                    type="button"
+                    value=">|"
+                    onclick="lastPage();" />
+        </div>
+
+        <div style="position:absolute;left:0px;top:50px;background:#fff">
+            <canvas id="canvas"></canvas>
+            <div id="panel"></div>
+        </div>
+
+        <script type="text/javascript">
+var pg_no = 0;
+var pg_cnt = pg_defs.length;
+var pg_zoom = 1.0;
+var pix_size = 2.0;
+function zoomIn() {
+    var zoom = pg_zoom * 1.25;
+    if(zoom > 3) zoom = 3;
+    if(zoom == pg_zoom) return;
+    pg_zoom = zoom;
+    draw_page(pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function zoomOut() {
+    zoom = pg_zoom * 0.8;
+    if(zoom < 0.3) zoom = 0.3;
+    if(zoom == pg_zoom) return;
+    pg_zoom = zoom;
+    draw_page(pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function firstPage() {
+	pg_no = 0;
+	draw_page(pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function prevPage() {
+	if(pg_no <= 0) return;
+	pg_no--;
+	draw_page(pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function nextPage() {
+	if(pg_no > pg_cnt - 2) return;
+	pg_no++;
+	draw_page(pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function lastPage() {
+	pg_no = pg_cnt-1;
+	draw_page(pg_no, "canvas", "panel", pg_zoom, pix_size);
+}
+function gotoPage(pgno) {
+	pg_no = pgno;
+	if(pg_no < 0) pg_no = 0;
+	if(pg_no >= pg_cnt) pg_no = pg_cnt - 1;
+}
+draw_page(pg_no, "canvas", "panel", pg_zoom, pix_size);
+
+        </script>
+
+    </body>
+</html>

@@ -1,0 +1,10 @@
+.rdtxt{
+position:absolute;
+color:rgba(0,0,0,0);
+overflow:hidden;
+white-space: nowrap;
+}
+.rdtxt::selection {
+    background:rgba(0,0,128,0.25);
+    color:rgba(0,0,0,0);
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.radaee.pen.RDPenView
+        android:id="@+id/view_pen"
+        android:layout_marginTop="40dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <LinearLayout
+        android:background="@color/toolbar_bg_color"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:src="@drawable/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+        <ImageView
+            android:id="@+id/btn_pen"
+            android:src="@drawable/pen_pen"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+        <com.radaee.pen.RDColorOvalView
+            android:id="@+id/btn_color"
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+        <ImageView
+            android:id="@+id/btn_undo"
+            android:src="@drawable/btn_undo"
+            android:paddingLeft="0px"
+            android:paddingRight="0px"
+            android:layout_width="54dp"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/btn_redo"
+            android:src="@drawable/btn_redo"
+            android:paddingLeft="0px"
+            android:paddingRight="0px"
+            android:layout_width="54dp"
+            android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/btn_setting"
+            android:src="@drawable/ic_settings"
+            android:paddingLeft="0px"
+            android:paddingRight="0px"
+            android:layout_width="54dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>

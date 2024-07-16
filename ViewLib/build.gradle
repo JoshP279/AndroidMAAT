@@ -1,0 +1,40 @@
+apply plugin: 'com.android.library'
+
+android {
+    signingConfigs {
+    }
+
+    defaultConfig {
+        minSdkVersion 14
+        compileSdk 34
+        renderscriptTargetApi 18
+        renderscriptSupportModeEnabled true
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+    lint {
+        abortOnError false
+    }
+    namespace 'com.radaee.viewlib'
+}
+
+dependencies {
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
+}
+
+task deleteJar(type: Delete) {
+    delete 'libs/com.radaee.view.jar'
+}
+
+task CreateJar(type: Jar) {
+    archiveFileName = "com.radaee.view.jar"
+    from('build/intermediates/classes/debug') {
+        include('com/radaee/view/**')
+    }
+}
+CreateJar.dependsOn(deleteJar, build)

@@ -1,0 +1,68 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".PDFReaderAct">
+
+    <item
+        android:id="@+id/action_view_mode"
+        android:icon="@drawable/ic_view_mode"
+        android:orderInCategory="100"
+        android:title="@string/text_view_mode_label"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_view_vert"
+                android:icon="@drawable/ic_view_vert"
+                android:title="@string/text_view_vert_label" />
+            <item
+                android:id="@+id/action_view_horz"
+                android:icon="@drawable/ic_view_horz"
+                android:title="@string/text_view_horz_label" />
+            <item
+                android:id="@+id/action_view_page"
+                android:icon="@drawable/ic_view_single"
+                android:title="@string/text_view_single_label" />
+            <item
+                android:id="@+id/action_view_dual"
+                android:icon="@drawable/ic_view_double_page"
+                android:title="@string/text_view_dual_label" />
+        </menu>
+    </item>
+    <item
+        android:id="@+id/action_menu"
+        android:icon="@drawable/ic_menu"
+        android:orderInCategory="100"
+        android:title="@string/text_action_menu_label"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_book_mark"
+        android:icon="@drawable/ic_bookmark"
+        android:orderInCategory="100"
+        android:title="@string/text_book_mark_list_label"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_mark_menu"
+        android:icon="@drawable/overflow_dark"
+        android:orderInCategory="100"
+        android:title=""
+        app:showAsAction="always">
+    <menu>
+        <item
+            android:id="@+id/action_setMarked"
+            android:title="@string/set_as_marked"
+            android:orderInCategory="100"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_setUnmarked"
+            android:title="@string/set_as_unmarked"
+            android:orderInCategory="100"
+            app:showAsAction="never" />
+        <item
+            android:id="@+id/action_setInProgress"
+            android:title="@string/set_as_in_progress"
+            android:orderInCategory="100"
+            app:showAsAction="never" />
+    </menu>
+</item>
+</menu>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/txt_issue"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center_vertical"
+        android:text="@string/text_issue_label" />
+
+    <TextView
+        android:id="@+id/txt_subject"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/txt_issue"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:text="@string/text_cert_subject_label" />
+
+    <TextView
+        android:id="@+id/txt_version"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/txt_subject"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:text="@string/text_version_label" />
+
+    <TextView
+        android:id="@+id/txt_reason"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/txt_version"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:text="@string/text_reason_label" />
+
+    <TextView
+        android:id="@+id/txt_location"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/txt_reason"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:text="@string/text_location_label" />
+
+    <TextView
+        android:id="@+id/txt_contact"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/txt_location"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:text="@string/text_contact_label" />
+
+    <TextView
+        android:id="@+id/txt_mod"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/txt_contact"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:text="@string/text_sign_time_label" />
+
+    <TextView
+        android:id="@+id/txt_verify"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/txt_mod"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical"
+        android:text="@string/text_verify_label" />
+</RelativeLayout>

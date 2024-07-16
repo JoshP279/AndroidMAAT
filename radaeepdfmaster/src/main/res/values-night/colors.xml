@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#0A84FF</color>
+    <color name="colorPrimaryDark">#006BB6</color>
+    <color name="colorAccent">#FF9500</color>
+    <color name="windowBackground">#121212</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="green">#4CAF50</color>
+    <color name="red">#F44336</color>
+    <color name="borderColor">@color/white</color>
+    <color name="actionBarTextColor">#888888</color>
+    <color name="actionButtonBG">#45A6FF</color>
+</resources>

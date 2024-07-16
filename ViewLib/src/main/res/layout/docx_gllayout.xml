@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.radaee.reader.DOCXGLLayoutView
+        android:id="@+id/docx_glview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"></com.radaee.reader.DOCXGLLayoutView>
+    <LinearLayout
+        android:id="@+id/text_select_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#99AAAAAA"
+        android:padding="5dp"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/icon_copy"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_copy"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+</RelativeLayout>
