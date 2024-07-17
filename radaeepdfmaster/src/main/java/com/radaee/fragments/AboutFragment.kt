@@ -25,10 +25,11 @@ class AboutFragment : Fragment() {
     private fun displayHelperDialog() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.helperHeading)
-        builder.setMessage(R.string.assessmentsHelperMessage)
+        builder.setMessage(R.string.aboutHelperMessage)
         builder.setPositiveButton(resources.getString(R.string.ok)) { dialog, _ -> dialog.dismiss() }
         val alertDialog: AlertDialog = builder.create()
         alertDialog.setCancelable(false)
         alertDialog.show()
     }
+
 }

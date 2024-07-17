@@ -90,7 +90,11 @@
     <string name="log_in">Log In</string>
     <string name="assessments">Assessments</string>
     <string name="helperHeading">What does this screen do?</string>
-    <string name="assessmentsHelperMessage">This screen displays the assessments that you are able to mark. Only the assessments that you have added as a marker will be displayed.</string>
+    <string name="assessmentsHelperMessage">This screen displays the assessments that you are able to mark. Only the assessments that you have been added as a marker will be displayed.</string>
+    <string name="logInHelperMessage">Log in with your university credentials (email and password) to proceed.</string>
+    <string name="aboutHelperMessage">This screen displays some basic information about MAAT.</string>
+    <string name="helpHelperMessage">This screen displays some basic information about every screen throughout the app Look at the top right corner if you are unsure about the purpose of the screen you are currently on.</string>
+    <string name="settingsHelperMessage">This screen displays some of the settings you can change to customise the app to your liking. Try switching themes, changing the language, and selecting your marking style.</string>
     <string name="home">Home</string>
     <string name="view_assessments">View Assessments</string>
     <string name="settings">Settings</string>
@@ -113,7 +117,7 @@
     <string name="submissions_help_header">Submissions</string>
     <string name="submissions_help_text">The Submissions screen allows you to view and manage all submissions. You can search for, sort, and update submission statuses from this screen.</string>
     <string name="full_app_name">Mobile Assessment and Annotaion Tool</string>
-    <string name="submissionsHelperMessage">This screen displays all the submissions for an assessment.</string>
+    <string name="submissionsHelperMessage">This screen displays all the submissions for an assessment that you can assess.</string>
     <string name="marked">Marked</string>
     <string name="unmarked">Unmarked</string>
     <string name="in_progress">In Progress</string>
@@ -153,4 +157,6 @@
     <string name="upload_succes">Successfully uploaded submission</string>
     <string name="upload_fail">Failed to upload submission PDF</string>
     <string name="recent_submissions">Recent Submissions</string>
+    <string name="app_exit_header">Exit app</string>
+    <string name="app_exit_msg">Are you sure you want to exit?</string>
 </resources>

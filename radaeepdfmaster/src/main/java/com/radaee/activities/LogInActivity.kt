@@ -3,6 +3,7 @@ package com.radaee.activities
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -35,6 +36,7 @@ class LogInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_log_in)
+        SharedPref.saveBoolean(this,"DARK_MODE",(resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
         loginBtn = findViewById(R.id.loginBtn)
         emailTextview = findViewById(R.id.loginEmail)
         passwordTextView = findViewById(R.id.loginPassword)
@@ -59,7 +61,7 @@ class LogInActivity : AppCompatActivity() {
     private fun displayHelperDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.helperHeading)
-        builder.setMessage(R.string.assessmentsHelperMessage)
+        builder.setMessage(R.string.logInHelperMessage)
         builder.setPositiveButton(R.string.ok) { dialog, _ -> dialog.dismiss() }
         val alertDialog: AlertDialog = builder.create()
         alertDialog.setCancelable(false)
