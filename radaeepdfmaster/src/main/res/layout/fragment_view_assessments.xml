@@ -21,12 +21,14 @@
 
     <SearchView
         android:id="@+id/assessmentSearchView"
-        android:layout_width="650dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
         android:iconifiedByDefault="false"
         android:queryHint="Search assessments"
+        app:layout_constraintEnd_toStartOf="@+id/assessmentsHelper"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -31,7 +31,7 @@ interface API {
         @Query("AssessmentID") assessmentID: Int
     ): Call<List<SubmissionsResponse>>
 
-    @PUT("/updateSubmission")
+    @PUT("/updateSubmissionStatus")
     fun updateSubmission(
         @Body request: UpdateSubmissionRequest
     ): Call<SingleResponse>
@@ -47,7 +47,7 @@ interface API {
     ): Call<PDFResponse>
 
     @Multipart
-    @PUT("/uploadSubmission")
+    @PUT("/uploadMarkedSubmission")
     fun uploadSubmissionPDF(
         @Part("submissionID") submissionID: Int,
         @Part("assessmentID") assessmentID: Int,
