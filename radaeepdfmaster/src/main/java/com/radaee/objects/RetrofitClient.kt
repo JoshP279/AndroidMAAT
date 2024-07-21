@@ -47,7 +47,6 @@ object RetrofitClient {
                     if (resp?.message.equals("Login successful")) {
                         SharedPref.saveString(context,"email", email)
                         SharedPref.saveString(context,"password", password)
-                        Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
                         val intent = Intent(context, MainActivity::class.java)
                         context.startActivity(intent)
                         (context as LogInActivity).finish()

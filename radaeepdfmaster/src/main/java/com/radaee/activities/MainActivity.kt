@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
             navView.setCheckedItem(R.id.nav_assessments)
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = ""
         navView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.nav_assessments -> supportFragmentManager.beginTransaction()

@@ -121,9 +121,17 @@ class LogInActivity : AppCompatActivity() {
     private fun requestReadWritePermissions() {
         val permissions = arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.INTERNET
         )
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS)
+        if (!hasReadWritePermissions()) {
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS)
+        }
+    }
+
+    private fun hasReadWritePermissions(): Boolean {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -131,8 +139,6 @@ class LogInActivity : AppCompatActivity() {
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 Toast.makeText(this, R.string.permissions_granted, Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, R.string.permissions_denied, Toast.LENGTH_SHORT).show()
             }
         }
     }
