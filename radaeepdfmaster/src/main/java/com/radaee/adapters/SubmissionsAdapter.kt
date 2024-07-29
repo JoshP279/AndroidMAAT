@@ -18,6 +18,12 @@ import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.objects.RetrofitClient
 import com.radaee.pdfmaster.R
 
+/**
+ * Adapter for the recycler view that displays the submissions
+ * @param mList list of submissions
+ * @param context context of the activity, which is @SubmissionsActivity
+ * This adapter just binds the necessary data to the submissions card view
+ */
 class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private val context: Context) : RecyclerView.Adapter<SubmissionsAdapter.ViewHolder>()  {
     private var listener: OnItemClickListener? = null
     private var submissionUpdateListener: SubmissionUpdateListener? = null
@@ -29,13 +35,22 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
             LayoutInflater.from(parent.context).inflate(R.layout.cardview_submission, parent, false)
         return ViewHolder(view)
     }
+    /**
+     * Interface for the listener that listens for submission updates
+     */
     interface SubmissionUpdateListener {
         fun onSubmissionUpdated()
     }
+
+    /**
+     * Sets the listener for submission updates
+     * @param listener listener for submission updates
+     */
     fun setSubmissionUpdateListener(listener: SubmissionUpdateListener) {
         this.submissionUpdateListener = listener
     }
     override fun getItemCount() = mList.size
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mList[position]
         holder.submissionsSurnameTextView.text = item.studentSurname + ", "
@@ -46,6 +61,13 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
         holder.overflowMenu.setOnClickListener { showPopupMenu(holder.overflowMenu, position)}
         holder.bind(item)
     }
+
+    /**
+     * Custom pop up menu that allows for a submission status to be updated
+     * @param view view of the card view
+     * @param position position of the card view
+     * This function shows a pop up menu when the overflow menu is clicked
+     */
     private fun showPopupMenu(view: View, position: Int) {
         val popup = PopupMenu(context, view)
         val inflater: MenuInflater = popup.menuInflater
@@ -54,18 +76,34 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
         popup.setOnMenuItemClickListener(MyMenuItemClickListener(position))
         popup.show()
     }
+
+    /**
+     * Set the icon for the respective menu item
+     */
     private fun setMenuIcons(popup: PopupMenu) {
         popup.menu.findItem(R.id.action_setMarked).icon = ContextCompat.getDrawable(context, R.drawable.tick)
         popup.menu.findItem(R.id.action_setUnmarked).icon = ContextCompat.getDrawable(context, R.drawable.unmarked)
         popup.menu.findItem(R.id.action_setInProgress).icon = ContextCompat.getDrawable(context, R.drawable.inprogress)
     }
+
+    /**
+     * Update the submission status
+     * All params are necessary to update the submission status
+     * @param submissionID submission's unique ID
+     * @param assessmentID assessment's unique ID
+     * @param studentNumber student number
+     * @param submissionStatus submission status to update (marked, unmarked, in progress)
+     */
     private fun updateSubmission(submissionID: Int, assessmentID:Int, studentNumber: String, submissionStatus: String) {
         if (context is SubmissionsActivity) {
-            Log.e("check", assessmentID.toString())
             RetrofitClient.updateSubmission(context,submissionID,assessmentID,studentNumber,submissionStatus)
             submissionUpdateListener?.onSubmissionUpdated()
         }
     }
+    /**
+     * This handles the click events for the pop up menu
+     * @param position position of the card view
+     */
     inner class MyMenuItemClickListener(position: Int) : PopupMenu.OnMenuItemClickListener {
         private val cur = mList[position]
         override fun onMenuItemClick(item: MenuItem): Boolean {
@@ -86,6 +124,13 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
             }
         }
     }
+
+    /**
+     * View holder for the recycler view
+     * @param ItemView view of the card view
+     * This class just binds the text views in the card view
+     */
+
     inner class ViewHolder(ItemView: View): RecyclerView.ViewHolder(ItemView){
         val submissionsNameTextView: TextView = itemView.findViewById(R.id.submissionNameTextView)
         val submissionsSurnameTextView: TextView = itemView.findViewById(R.id.submissionsSurnameTextView)
@@ -99,12 +144,24 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
             }
         }
     }
+    /**
+     * Interface for the listener that listens for item clicks
+     */
     fun interface OnItemClickListener{
         fun onItemClick(position: Int)
     }
+
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.listener = listener
     }
+
+    /**
+     * Update the status image and text
+     * @param imageView image view of the status
+     * @param textView text view of the status
+     * @param status status of the submission
+     * This function updates the status image and text based on the submission status, not the database submission status itself, that is done in the @updateSubmission function
+     */
     private fun updateStatusImageAndText(imageView: ImageView, textView: TextView, status: String){
         when(status){
             context.getString(R.string.marked) -> {

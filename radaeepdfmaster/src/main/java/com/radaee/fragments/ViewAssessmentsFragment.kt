@@ -21,6 +21,9 @@ import com.radaee.objects.RetrofitClient
 import com.radaee.pdfmaster.R
 import com.radaee.decorators.EqualSpaceItemDecoration
 
+/**
+ * ViewAssessmentsFragment is a fragment that displays a list of assessments that the marker is assigned to.
+ */
 class ViewAssessmentsFragment : Fragment() {
     private lateinit var assessmentsList: RecyclerView
     private lateinit var adapter: AssessmentsAdapter
@@ -43,10 +46,12 @@ class ViewAssessmentsFragment : Fragment() {
         assessmentsList = view.findViewById(R.id.assessmentsRecyclerView)
         searchView = view.findViewById(R.id.assessmentSearchView)
         assessmentHelper = view.findViewById(R.id.assessmentsHelper)
+        swipeRefreshLayout = view.findViewById(R.id.assessmentsSwipeRefresh)
+
         assessmentHelper.setOnClickListener {
             displayHelperDialog()
         }
-        swipeRefreshLayout = view.findViewById(R.id.assessmentsSwipeRefresh)
+
         swipeRefreshLayout.setOnRefreshListener {
             RetrofitClient.loadAssessments(requireContext(),assessments,filteredAssessments,assessmentsList)
             swipeRefreshLayout.isRefreshing = false
@@ -55,6 +60,9 @@ class ViewAssessmentsFragment : Fragment() {
         setUpSearchView()
     }
 
+    /**
+     * Displays a dialog that provides information on how to use the assessments fragment.
+     */
     private fun displayHelperDialog() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.helperHeading)
@@ -64,6 +72,11 @@ class ViewAssessmentsFragment : Fragment() {
         alertDialog.setCancelable(false)
         alertDialog.show()
     }
+
+    /**
+     * Sets up the recycler view that displays the list of assessments.
+     * The recycler view is populated with the assessments that the marker is assigned to.
+     */
     private fun setUpRecyclerView() {
         assessmentsList.layoutManager = GridLayoutManager(requireContext(), 2)
         RetrofitClient.loadAssessments(requireContext(),assessments,filteredAssessments,assessmentsList)
@@ -81,6 +94,10 @@ class ViewAssessmentsFragment : Fragment() {
             }
         })
     }
+
+    /**
+     * Sets up the search view that allows the user to search for assessments by module code or assessment name.
+     */
     private fun setUpSearchView(){
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
             override fun onQueryTextChange(newText: String?): Boolean {
@@ -92,6 +109,11 @@ class ViewAssessmentsFragment : Fragment() {
             }
         })
     }
+
+    /**
+     * Filters the list of assessments based on the user's search query.
+     * Essentially handles all necessary logic for filtering the assessments.
+     */
     private fun filterAssessments(query: String?){
         val filteredList = if (!query.isNullOrEmpty()){
             assessments.filter{

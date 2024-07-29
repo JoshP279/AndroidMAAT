@@ -1,6 +1,5 @@
 package com.radaee.activities
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
@@ -21,20 +20,18 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.radaee.adapters.SubmissionsAdapter
 import com.radaee.comm.Global
-import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.decorators.EqualSpaceItemDecoration
 import com.radaee.objects.FileUtil
 import com.radaee.objects.RetrofitClient
 import com.radaee.pdf.Document
 import com.radaee.pdfmaster.R
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
+/**
+ * This activity displays the submissions for a particular assessment.
+ * When a submission is clicked, the user is taken to the PDFReaderActivity where they can view the submission and memo PDFs.
+ */
 class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUpdateListener{
     private lateinit var submissionsAssessmentNameTextView: TextView
     private lateinit var submissionsRecyclerView: RecyclerView
@@ -50,29 +47,38 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
     private var memoPDF: Document? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        /// Initialize the Global class for the RadaeePDFSDK. This is required to use the SDK.
         Global.Init(this)
         setContentView(R.layout.activity_submissions)
-        submissionsAssessmentNameTextView = findViewById(R.id.submissionsAssessmentNameTextView)
-        val intent = intent
-        submissionsAssessmentNameTextView.text = intent?.getStringExtra("assessmentName")
-        assessmentID = intent.getIntExtra("assessmentID",1)
         submissionsSearchView = findViewById(R.id.submissionsSearchView)
         submissionsRecyclerView = findViewById(R.id.submissionsRecyclerView)
         swipeRefreshLayout = findViewById(R.id.submissionsSwipeRefresh)
         filterSpinner = findViewById(R.id.filterSpinner)
+        submissionsAssessmentNameTextView = findViewById(R.id.submissionsAssessmentNameTextView)
+        submissionsHelper = findViewById(R.id.submissionsHelper)
+        //Obtaining information from previous activity
+        val intent = intent
+        submissionsAssessmentNameTextView.text = intent?.getStringExtra("assessmentName")
+        assessmentID = intent.getIntExtra("assessmentID",1)
+
         swipeRefreshLayout.setOnRefreshListener {
             RetrofitClient.loadSubmissions(this,assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
             swipeRefreshLayout.isRefreshing = false
         }
-        submissionsHelper = findViewById(R.id.submissionsHelper)
+
         submissionsHelper.setOnClickListener{
             displayHelperDialog()
         }
+
         setUpRecyclerView()
         setUpSearchView()
         setUpFilterSpinner()
     }
 
+    /**
+     * This function sets up the filter spinner for the submissions.
+     * The spinner has four options: All, Marked, In Progress, Unmarked. Each of these will filter the submissions accordingly.
+     */
     private fun setUpFilterSpinner() {
         val statuses = arrayOf(
             getString(R.string.all),
@@ -91,6 +97,9 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         }
     }
 
+    /**
+     * This function filters the submissions based on the selected option in the filter spinner. Essentially the logic behind the options is as follows:
+     */
     private fun filterOptions() {
         val selectedFilter = filterSpinner.selectedItem.toString()
         filteredSubmissions.clear()
@@ -111,6 +120,9 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         adapter.notifyDataSetChanged()
     }
 
+    /**
+     * This function displays a dialog box with a message to help the user understand the purpose of the submissions activity.
+     */
     private fun displayHelperDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.helperHeading)
@@ -125,6 +137,11 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         return false
     }
 
+    /**
+     * This function sets up the recycler view for the submissions.
+     * It uses the SubmissionsAdapter to display the submissions in a list.
+     * Note that the RetrofitClient is used to load the submissions from the server.
+     */
     private fun setUpRecyclerView() {
         submissionsRecyclerView.layoutManager = LinearLayoutManager(applicationContext)
         RetrofitClient.loadSubmissions(this,assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
@@ -134,10 +151,15 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         submissionsRecyclerView.addItemDecoration(EqualSpaceItemDecoration(10))
         (submissionsRecyclerView.adapter as SubmissionsAdapter).setOnItemClickListener(submissionOnClickListener)
     }
-
+    /**
+     * This is the click listener for the submissions. There are 4 possibilities when clicking on a submission:
+     * 1. The submission PDF exists and the memo PDF exists. No downloads are necessary, and proceed to the PDFReaderActivity.
+     * 2. The submission PDF does not exist but the memo PDF exists. Download the submission PDF and proceed to the PDFReaderActivity.
+     * 3. The submission PDF exists but the memo PDF does not exist. Download the memo PDF and proceed to the PDFReaderActivity.
+     * 4. Neither the submission PDF nor the memo PDF exists. Download both PDFs and proceed to the PDFReaderActivity.
+     */
     private val submissionOnClickListener = SubmissionsAdapter.OnItemClickListener { position ->
         val submission = filteredSubmissions[position]
-//        HomeActivity.recentSubmissions.add(submission)
         val folderName = "Assessment_${assessmentID}"
         val submissionFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
         val memoFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
@@ -175,8 +197,11 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             }
         }
     }
-
+    /**
+     * This function initializes the PDFReaderActivity with the submission and memo PDFs. Attaches both PDFs to the intent, as well studentNum, submissionID, and assessmentID.
+     */
     private fun initPDFReaderIntent(sPath:String,mPath: String,studentNumber: String, submissionID: Int){
+        //Note that these Document objects are custom objects, used to open PDFs with the RadaeePDFSDK.
         submissionPDF = Document()
         memoPDF = Document()
         val err1: Int = submissionPDF!!.Open(sPath, null)
@@ -194,7 +219,9 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         }
     }
 
-
+    /**
+     * This function sets up the search view for the submissions.
+     */
     private fun setUpSearchView(){
         submissionsSearchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
             override fun onQueryTextChange(newText: String?): Boolean {
@@ -208,6 +235,9 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         })
     }
 
+    /**
+     * This function searches the submissions based on the query entered by the user. Essentially, the search is case-insensitive and searches the student number, name, and surname.
+     */
     private fun searchSubmissions(query: String?){
         val filteredList = if (!query.isNullOrEmpty()){
             submissions.filter{
@@ -223,14 +253,22 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         adapter.notifyDataSetChanged()
     }
 
+    /**
+     * This function is called when the activity is destroyed.
+     * It closes the submission PDF and removes the temporary files.
+     */
     override fun onDestroy() {
-        submissionPDF?.let {
-            it.Close()
-            Global.RemoveTmp()
-        }
+        submissionPDF?.let { it.Close() }
+        memoPDF?.let{ it.Close() }
+        Global.RemoveTmp()
         super.onDestroy()
     }
 
+    /**
+     * This function is called when the submission is updated.
+     * An updated submission list is loaded from the server.
+     * Note that there is a delay of 1 second before the updated list is loaded, which is artificial in nature. It aims to ensure that the user can see that there submission status has changed.
+     */
     override fun onSubmissionUpdated() {
         Handler(Looper.getMainLooper()).postDelayed({
             RetrofitClient.loadSubmissions(this, assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)

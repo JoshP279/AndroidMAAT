@@ -9,6 +9,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.radaee.pdfmaster.R
 
+/**
+ * HelpFragment contains some information intended to help users understand the app
+ * Each activity/fragment is mentioned here, along with a brief description of its purpose
+ */
 class HelpFragment : Fragment() {
     private lateinit var helpHelper: TextView
     override fun onCreateView(
@@ -22,6 +26,10 @@ class HelpFragment : Fragment() {
         }
         return view
     }
+
+    /**
+     * Displays a dialog box with the helper message
+     */
     private fun displayHelperDialog() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.helperHeading)

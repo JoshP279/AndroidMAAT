@@ -14,38 +14,82 @@ import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Query
 
+/**
+ * API interface for Retrofit
+ * Contains all the API calls
+ * All implementations can be seen in @RetrofitClient
+ */
 interface API {
+    /**
+     * Login API
+     * @param markerEmail: Email of the marker
+     * @param password: Password of the marker
+     * @return SingleResponse containing the markerRole of the login request
+     */
     @GET("/login")
     fun login(
         @Query("MarkerEmail") markerEmail: String,
         @Query("Password") password: String
     ):Call<SingleResponse>
 
+    /**
+     * Get all assessments for a marker
+     * @param markerEmail: Email of the marker
+     * @return List<AssessmentResponse> containing assessments for the marker
+     */
     @GET("/assessments")
     fun getAssessments(
         @Query("MarkerEmail") markerEmail: String
     ): Call<List<AssessmentResponse>>
 
+    /**
+     * Get all submissions for an assessment
+     * @param assessmentID: ID of the assessment
+     * @return List<SubmissionsResponse> containing submissions for the assessment
+     */
     @GET("/submissions")
     fun getSubmissions(
         @Query("AssessmentID") assessmentID: Int
     ): Call<List<SubmissionsResponse>>
 
+    /**
+     * Update the status of a submission
+     * @param request: UpdateSubmissionRequest
+     * @return SingleResponse containing the result of the update request
+     */
     @PUT("/updateSubmissionStatus")
     fun updateSubmission(
         @Body request: UpdateSubmissionRequest
     ): Call<SingleResponse>
 
+    /**
+     * Get the PDF of a submission
+     * @param submissionID: ID of the submission
+     * @return PDFResponse containing the submission PDF
+     */
     @GET("/submissionPDF")
     fun getSubmissionPDF(
         @Query("SubmissionID") submissionID: Int
     ): Call<PDFResponse>
 
+    /**
+     * Get the PDF of a memo
+     * @param assessmentID: ID of the assessment
+     * @return PDFResponse containing the memo PDF
+     */
     @GET("/memoPDF")
     fun getMemoPDF(
         @Query("AssessmentID") assessmentID: Int
     ): Call<PDFResponse>
 
+    /**
+     * Upload the marked submission PDF
+     * @Multipart must be used here, as the submissionID, assessmentID and pdfFile are sent as form-data in the request (this is necessary for the pdfFile to be handled correctly by server)
+     * @param submissionID: ID of the submission
+     * @param assessmentID: ID of the assessment
+     * @param pdfFile: MultipartBody.Part
+     * @return SingleResponse containing the result of the upload request
+     */
     @Multipart
     @PUT("/uploadMarkedSubmission")
     fun uploadSubmissionPDF(

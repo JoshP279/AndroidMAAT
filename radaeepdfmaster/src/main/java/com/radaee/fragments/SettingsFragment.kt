@@ -17,6 +17,9 @@ import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
 import java.util.Locale
 
+/**
+ * SettingsFragment is a fragment that allows the user to change the app's theme, language and marking style.
+ */
 class SettingsFragment : Fragment() {
 
     private lateinit var themeSwitch: Switch
@@ -36,16 +39,24 @@ class SettingsFragment : Fragment() {
             displayHelperDialog()
         }
         setUpTheme()
-        setLanguageSpinner()
-        setMarkingChoiceSpinner()
+        setUpLanguageSpinner()
+        setUpMarkingChoiceSpinner()
         return view
     }
-    private fun setMarkingChoiceSpinner(){
+
+    /**
+     * Set the marking style spinner to the default value.
+     */
+    private fun setUpMarkingChoiceSpinner(){
         val markingChoices = arrayOf(getString(R.string.marking_style1))
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, markingChoices)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         markingChoiceSpinner.adapter = adapter
     }
+
+    /**
+     * Displays a dialog that provides information on how to use the settings fragment.
+     */
     private fun displayHelperDialog() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.helperHeading)
@@ -55,6 +66,10 @@ class SettingsFragment : Fragment() {
         alertDialog.setCancelable(false)
         alertDialog.show()
     }
+
+    /**
+     * Set up the theme switch to the default value. Note that the default value is saved in @LogInActivity
+     */
     private fun setUpTheme() {
         val isSystemDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         val isDarkModePref = SharedPref.getBoolean(requireContext(),"DARK_MODE", isSystemDarkMode)
@@ -68,7 +83,11 @@ class SettingsFragment : Fragment() {
             SharedPref.saveBoolean(requireContext(),"DARK_MODE", isChecked)
         }
     }
-    private fun setLanguageSpinner() {
+
+    /**
+     * Set up the language spinner to the default value.
+     */
+    private fun setUpLanguageSpinner() {
         val languages = arrayOf("English", "Afrikaans")
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, languages)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -89,6 +108,10 @@ class SettingsFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
+
+    /**
+     * Set the app's language to the selected language.
+     */
     private fun setLocale(languageCode: String) {
         val locale = Locale(languageCode)
         Locale.setDefault(locale)

@@ -159,4 +159,5 @@
     <string name="recent_submissions">Recent Submissions</string>
     <string name="app_exit_header">Exit app</string>
     <string name="app_exit_msg">Are you sure you want to exit?</string>
+    <string name="invalid_username_or_password">Invalid username or password</string>
 </resources>

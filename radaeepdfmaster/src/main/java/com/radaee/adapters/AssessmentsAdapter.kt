@@ -9,6 +9,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.radaee.dataclasses.AssessmentResponse
 import com.radaee.pdfmaster.R
 
+/**
+ * Adapter for the recycler view that displays the assessments
+ * @param mList list of assessments
+ * @param context context of the activity, which is @ViewAssessmentsFragment
+ * This adapter just binds the necessary data to the assessments card view
+ */
 class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private val context: Context) : RecyclerView.Adapter<AssessmentsAdapter.ViewHolder>() {
     private var listener: OnItemClickListener? = null
     override fun onCreateViewHolder(
@@ -19,6 +25,7 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
             LayoutInflater.from(parent.context).inflate(R.layout.cardview_assessment, parent, false)
         return ViewHolder(view)
     }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mList[position]
         holder.moduleCodeTextView.text = item.moduleCode
@@ -28,6 +35,12 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
         holder.bind(item)
     }
     override fun getItemCount() = mList.size
+
+    /**
+     * View holder for the recycler view
+     * @param itemView view of the card view
+     * This class just binds the text views in the card view
+     */
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val moduleCodeTextView: TextView = itemView.findViewById(R.id.assessmentModuleCodeTextView)
         val assessmentNameTextView: TextView = itemView.findViewById(R.id.assessmentNameTextView)
@@ -39,6 +52,9 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
             }
         }
     }
+    /**
+     * Interface for the listener that listens for item clicks
+     */
     interface OnItemClickListener {
         fun onItemClick(position: Int)
     }

@@ -1705,6 +1705,33 @@ public class Document
 	{
 		bundle.putLong("pdf_doc_handle", doc.hand_val);
 	}
+
+	/**
+	 * This code does not belong to RadaeePDFSDK, it was added by Josh
+	 */
+	public static void BundleSaveBoth(Bundle bundle, Document memo, Document submission){
+		bundle.putLong("pdf_doc_handle_memo", memo.hand_val);
+		bundle.putLong("pdf_doc_handle_submission", submission.hand_val);
+	}
+	/**
+	 * This code does not belong to RadaeePDFSDK, it was added by Josh
+	 */
+	public static Document[] BundleRestoreBoth(Bundle bundle) {
+		try {
+			long hand_memo = bundle.getLong("pdf_doc_handle_memo");
+			long hand_submission = bundle.getLong("pdf_doc_handle_submission");
+			if (hand_memo != 0 && hand_submission != 0) {
+				Document memo = new Document();
+				memo.hand_val = hand_memo;
+				Document submission = new Document();
+				submission.hand_val = hand_submission;
+				return new Document[]{memo, submission};
+			}
+			else return new Document[]{null, null};
+		} catch (Exception e) {
+			return new Document[]{null, null};
+		}
+	}
 	public static Document BundleRestore(Bundle bundle)
 	{
 		try
