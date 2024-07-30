@@ -266,6 +266,7 @@ abstract public class PDFEditLayout {
 
     public void gl_set_pos(int vx, int vy, PDFPos pos) {
         if (pos == null) return;
+        if (pos.pageno < 0 || pos.pageno >= m_page_cnt) return;
         PDFEditPage gpage = m_pages[pos.pageno];
         vSetX(gpage.GetVX(pos.x) - vx);
         vSetY(gpage.GetVY(pos.y) - vy);

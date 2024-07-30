@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -32,6 +33,7 @@ import com.radaee.util.CommonUtil;
 import com.radaee.view.IPDFLayoutView;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * PDFReaderActivity displays both the submission and the memo side by side.
@@ -79,6 +81,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private int submissionID;
     private int assessmentID;
     private int currentPos = 0;
+    private List<SubmissionsResponse> filteredSubmissions;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +100,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         saveButton = findViewById(R.id.saveButton);
         commentButton = findViewById(R.id.commentButton);
         bookmarkButton = findViewById(R.id.bookMarkButton);
+        filteredSubmissions = SubmissionsActivity.Companion.getFilteredSubmissions();
         prevSubmissionButton = findViewById(R.id.btnPrevSubmission);
         nextSubmissionButton = findViewById(R.id.btnNextSubmission);
         nextSubmissionButton.setOnClickListener(submissionClickListener);
@@ -126,6 +130,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             sPDFView.PDFOpen(sPDFDoc, PDFReaderActivity.this);
             sFilePath = sPDFDoc.getDocPath();
             mPDFView.PDFOpen(mPDFDoc, PDFReaderActivity.this);
+            mFilePath = mPDFDoc.getDocPath();
         }
     }
 
@@ -135,10 +140,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      * This is applied to both of the buttons, @id/btnNextSubmission and @id/btnPrevSubmission, to allow for easy disabling of the buttons when the user is at the first or last submission.
      */
     private final View.OnClickListener submissionClickListener = v -> {
-        boolean check = currentPos > 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size();
         int nextPos = -1;
         if (currentPos >= 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size()) {
-            SubmissionsResponse submission = SubmissionsActivity.Companion.getFilteredSubmissions().get(currentPos);
+            Log.e("size", String.valueOf(filteredSubmissions.size()));
+            SubmissionsResponse submission = filteredSubmissions.get(currentPos);
             if (currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size())
                 nextPos = switch (v.getId()) {
                     case R.id.btnNextSubmission -> currentPos + 1;
@@ -150,7 +155,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 currentPos = SubmissionsActivity.Companion.getCurPos();
                 prevSubmissionButton.setEnabled(currentPos > 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size());
                 nextSubmissionButton.setEnabled(currentPos >= 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size() - 1);
-                openSubmission(submission, currentPos);
+                openSubmission(submission);
             }
         }
     };
@@ -158,10 +163,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     /**
      * openSubmission is used to open the submission and memo for the current student.
      * @param submission - the current submission with relevant information
-     * @param currentPos - the current position of the submission in the list of submissions
      * The submission is opened by checking if the submission and memo PDFs exist locally.
      */
-    private void openSubmission(SubmissionsResponse submission, int currentPos) {
+    private void openSubmission(SubmissionsResponse submission) {
         studentNumber = submission.getStudentNumber();
         submissionID = submission.getSubmissionID();
         assessmentID = submission.getAssessmentID(); //assessmentID should not change, sanity check
@@ -233,15 +237,17 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      * @param mPath - the path to the memo PDF
      */
     private void initPDFReader(String sPath, String mPath) {
+//        mPDFDoc.Close();
+        sPDFDoc.Close();
         sPDFDoc = new Document();
-        mPDFDoc = new Document();
+//        mPDFDoc = new Document();
         int err1 = sPDFDoc.Open(sPath, null);
-        int err2 = mPDFDoc.Open(mPath, null);
-        if (err1 == 0 && err2 == 0) {
-            sPDFView.PDFOpen(sPDFDoc, this);
+//        int err2 = mPDFDoc.Open(mPath, null);
+        if (err1 == 0) {
+            sPDFView.PDFOpen(sPDFDoc, PDFReaderActivity.this);
             sFilePath = sPDFDoc.getDocPath();
-            mPDFView.PDFOpen(mPDFDoc, this);
-            mFilePath = mPDFDoc.getDocPath();
+//            mPDFView.PDFOpen(mPDFDoc, PDFReaderActivity.this);
+//            mFilePath = mPDFDoc.getDocPath();
         } else {
             Toast.makeText(getApplicationContext(), R.string.pdf_fail_open, Toast.LENGTH_SHORT).show();
         }

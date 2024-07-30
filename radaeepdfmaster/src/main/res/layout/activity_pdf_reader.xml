@@ -173,7 +173,7 @@
         android:id="@+id/btnNextSubmission"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
-        android:text="|>"
+        android:text=">"
         app:layout_constraintEnd_toStartOf="@+id/linearLayout"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -181,7 +181,7 @@
         android:id="@+id/btnPrevSubmission"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
-        android:text="prev"
+        android:text=">"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

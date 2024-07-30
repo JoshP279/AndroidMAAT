@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.AdapterView
@@ -33,6 +34,10 @@ import java.io.File
  * When a submission is clicked, the user is taken to the PDFReaderActivity where they can view the submission and memo PDFs.
  */
 class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUpdateListener{
+    /**
+     * The companion object contains the filtered submissions and the current position of the submission clicked.
+     * This is used to ensure that the correct submission is opened in the PDFReaderActivity.
+     */
     companion object{
         var filteredSubmissions = ArrayList<SubmissionsResponse>()
         var curPos = -1
@@ -164,6 +169,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
      */
     private val submissionOnClickListener = SubmissionsAdapter.OnItemClickListener { position ->
         curPos = position
+        Log.e("SubmissionsActivity", "Position: $position")
         val submission = filteredSubmissions[position]
         val folderName = "Assessment_${assessmentID}"
         val submissionFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
