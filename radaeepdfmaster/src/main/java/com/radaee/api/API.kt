@@ -1,6 +1,7 @@
 package com.radaee.api
 
 import com.radaee.dataclasses.AssessmentResponse
+import com.radaee.dataclasses.LogInResponse
 import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SingleResponse
 import com.radaee.dataclasses.SubmissionsResponse
@@ -30,7 +31,7 @@ interface API {
     fun login(
         @Query("MarkerEmail") markerEmail: String,
         @Query("Password") password: String
-    ):Call<SingleResponse>
+    ):Call<LogInResponse>
 
     /**
      * Get all assessments for a marker

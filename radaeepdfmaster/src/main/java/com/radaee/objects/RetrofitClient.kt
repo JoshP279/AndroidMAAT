@@ -11,6 +11,7 @@ import com.radaee.activities.MainActivity
 import com.radaee.activities.SubmissionsActivity
 import com.radaee.api.API
 import com.radaee.dataclasses.AssessmentResponse
+import com.radaee.dataclasses.LogInResponse
 import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SingleResponse
 import com.radaee.dataclasses.SubmissionsResponse
@@ -59,14 +60,15 @@ object RetrofitClient {
      * The user is then redirected to the MainActivity.
      */
     fun attemptLogin(context: Context, email:String, password:String) {
-        api.login(email, password).enqueue(object : Callback<SingleResponse> {
+        api.login(email, password).enqueue(object : Callback<LogInResponse> {
             override fun onResponse(
-                call: Call<SingleResponse>,
-                response: Response<SingleResponse>
+                call: Call<LogInResponse>,
+                response: Response<LogInResponse>
             ) {
                 if (response.isSuccessful) {
                     val resp = response.body()
-                    if (resp?.message.equals("Lecturer") || resp?.message.equals("Demi")) {
+                    Toast.makeText(context, resp?.toString(), Toast.LENGTH_SHORT).show()
+                    if (resp?.MarkerRole.equals("Lecturer") || resp?.MarkerRole.equals("Demi")) {
                         SharedPref.saveString(context,"email", email)
                         SharedPref.saveString(context,"password", password)
                         val intent = Intent(context, MainActivity::class.java)
@@ -79,8 +81,7 @@ object RetrofitClient {
                         .show()
                 }
             }
-
-            override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
+            override fun onFailure(call: Call<LogInResponse>, t: Throwable) {
                 t.printStackTrace()
                 Toast.makeText(context, context.getString(R.string.server_connect_fail), Toast.LENGTH_SHORT).show()
             }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -65,8 +66,8 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="30dp"
             android:background="@drawable/bookmark"
-            android:scaleType="fitCenter"
             android:contentDescription="@string/bookmark_add"
+            android:scaleType="fitCenter"
             app:layout_constraintStart_toEndOf="@+id/redoButton"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -119,7 +120,9 @@
         app:layout_constraintEnd_toStartOf="@id/divider"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintVertical_bias="1.0" >
+
+    </com.radaee.reader.PDFEditLayoutView>
 
     <com.radaee.reader.PDFEditLayoutView
         android:id="@+id/pdf_view"
@@ -151,6 +154,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginBottom="10dp"
         android:text="@string/memorandum"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/memo_view"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -161,7 +165,24 @@
         android:layout_marginEnd="5dp"
         android:layout_marginBottom="10dp"
         android:text="@string/submission"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/pdf_view"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/btnNextSubmission"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:text="|>"
+        app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnPrevSubmission"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:text="prev"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

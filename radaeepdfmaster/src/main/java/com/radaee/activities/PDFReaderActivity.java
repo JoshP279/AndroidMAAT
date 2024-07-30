@@ -4,18 +4,24 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
+
 import com.radaee.comm.Global;
+import com.radaee.dataclasses.SubmissionsResponse;
+import com.radaee.objects.FileUtil;
 import com.radaee.objects.RetrofitClient;
 import com.radaee.pdf.Document;
 import com.radaee.pdf.Page;
@@ -24,6 +30,8 @@ import com.radaee.reader.PDFEditLayoutView;
 import com.radaee.util.BookmarkHandler;
 import com.radaee.util.CommonUtil;
 import com.radaee.view.IPDFLayoutView;
+
+import java.io.File;
 
 /**
  * PDFReaderActivity displays both the submission and the memo side by side.
@@ -50,6 +58,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private boolean need_save_doc = false;
     private Document sPDFDoc = null;
     private Document mPDFDoc = null;
+    private String mFilePath;
     private String sFilePath;
     private PDFEditLayoutView sPDFView;
     private PDFEditLayoutView mPDFView;
@@ -64,14 +73,18 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private ImageButton bookmarkButton;
     private ImageButton commentButton;
     private TextView studentNum;
+    private Button nextSubmissionButton;
+    private Button prevSubmissionButton;
     private String studentNumber;
     private int submissionID;
     private int assessmentID;
+    private int currentPos = 0;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         /// Initialize the Global class for the RadaeePDFSDK. This is required to use the SDK.
         Global.Init(this);
+        currentPos = SubmissionsActivity.Companion.getCurPos();
         setContentView(R.layout.activity_pdf_reader);
         rootLayout = findViewById(R.id.root);
         divider = findViewById(R.id.divider);
@@ -84,6 +97,12 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         saveButton = findViewById(R.id.saveButton);
         commentButton = findViewById(R.id.commentButton);
         bookmarkButton = findViewById(R.id.bookMarkButton);
+        prevSubmissionButton = findViewById(R.id.btnPrevSubmission);
+        nextSubmissionButton = findViewById(R.id.btnNextSubmission);
+        nextSubmissionButton.setOnClickListener(submissionClickListener);
+        prevSubmissionButton.setOnClickListener(submissionClickListener);
+        prevSubmissionButton.setEnabled(currentPos>0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size());
+        nextSubmissionButton.setEnabled(currentPos>=0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size()-1);
         inkButton.setOnClickListener(inkClickListener);
         undoButton.setOnClickListener(undoClickListener);
         redoButton.setOnClickListener(redoClickListener);
@@ -110,6 +129,123 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         }
     }
 
+    /**
+     * submissionClickListener is the OnClickListener for the nextSubmissionButton and prevSubmissionButton.
+     * This allows for markers to easily switch between submissions without having to close the activity and go back to the SubmissionActivity.
+     * This is applied to both of the buttons, @id/btnNextSubmission and @id/btnPrevSubmission, to allow for easy disabling of the buttons when the user is at the first or last submission.
+     */
+    private final View.OnClickListener submissionClickListener = v -> {
+        boolean check = currentPos > 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size();
+        int nextPos = -1;
+        if (currentPos >= 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size()) {
+            SubmissionsResponse submission = SubmissionsActivity.Companion.getFilteredSubmissions().get(currentPos);
+            if (currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size())
+                nextPos = switch (v.getId()) {
+                    case R.id.btnNextSubmission -> currentPos + 1;
+                    case R.id.btnPrevSubmission -> currentPos - 1;
+                    default -> nextPos;
+                };
+            if (nextPos != -1) {
+                SubmissionsActivity.Companion.setCurPos(nextPos);
+                currentPos = SubmissionsActivity.Companion.getCurPos();
+                prevSubmissionButton.setEnabled(currentPos > 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size());
+                nextSubmissionButton.setEnabled(currentPos >= 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size() - 1);
+                openSubmission(submission, currentPos);
+            }
+        }
+    };
+
+    /**
+     * openSubmission is used to open the submission and memo for the current student.
+     * @param submission - the current submission with relevant information
+     * @param currentPos - the current position of the submission in the list of submissions
+     * The submission is opened by checking if the submission and memo PDFs exist locally.
+     */
+    private void openSubmission(SubmissionsResponse submission, int currentPos) {
+        studentNumber = submission.getStudentNumber();
+        submissionID = submission.getSubmissionID();
+        assessmentID = submission.getAssessmentID(); //assessmentID should not change, sanity check
+        studentNum.setText(studentNumber);
+        String folderName = "Assessment_" + assessmentID;
+        File submissionFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
+        File memoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
+        String submissionName = "submission_" + submission.getStudentNumber() + ".pdf";
+        String memoName = "memo_" + assessmentID + ".pdf";
+        File sFile = new File(submissionFile, submissionName);
+        File mFile = new File(memoFile, memoName);
+        checkAndDownloadPDFs(submissionFile, memoFile, folderName, sFile, mFile, submission);
+    }
+
+    /**
+     * Similarly to the SubmissionActivity, the submission and memo PDFs are downloaded if they do not exist locally.
+     * If either do not exist, they are downloaded asynchronously and opened when the download is complete.
+     * @param submissionFile - the submission file
+     * @param memoFile - the memo file (theoretically, this should never change as it is the same for all submissions. As a sanity check, I still check if it exists to ensure I can proceed)
+     * @param folderName - the folder name for the assessment
+     * @param sFile - the submission file
+     * @param mFile - the memo file
+     * @param submission - the current submission with relevant information
+     */
+    private void checkAndDownloadPDFs(File submissionFile, File memoFile, String folderName, File sFile, File mFile, SubmissionsResponse submission) {
+        if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+            initPDFReader(sFile.getPath(), mFile.getPath());
+        } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getStudentNumber(), folderName, path -> {
+                if (path != null) {
+                    initPDFReader(path, mFile.getPath());
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.pdf_fail_download, Toast.LENGTH_SHORT).show();
+                }
+                return null;
+            });
+        } else if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getStudentNumber()) && !FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+            RetrofitClient.INSTANCE.downloadMemoPDF(this, assessmentID, folderName, path -> {
+                if (path != null) {
+                    initPDFReader(sFile.getPath(), path);
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.pdf_fail_download, Toast.LENGTH_SHORT).show();
+                }
+                return null;
+            });
+        } else {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getStudentNumber(), folderName, sPath -> {
+                if (sPath != null) {
+                    RetrofitClient.INSTANCE.downloadMemoPDF(this, assessmentID, folderName, mPath -> {
+                        if (mPath != null) {
+                            initPDFReader(sPath, mPath);
+                        } else {
+                            Toast.makeText(getApplicationContext(), R.string.pdf_fail_download, Toast.LENGTH_SHORT).show();
+                        }
+                        return null;
+                    });
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.pdf_fail_download, Toast.LENGTH_SHORT).show();
+                }
+                return null;
+            });
+        }
+    }
+
+    /**
+     * initPDFReader is used to initialize the PDF reader.
+     * Document(s) are instantiated again and opened.
+     * @param sPath - the path to the submission PDF
+     * @param mPath - the path to the memo PDF
+     */
+    private void initPDFReader(String sPath, String mPath) {
+        sPDFDoc = new Document();
+        mPDFDoc = new Document();
+        int err1 = sPDFDoc.Open(sPath, null);
+        int err2 = mPDFDoc.Open(mPath, null);
+        if (err1 == 0 && err2 == 0) {
+            sPDFView.PDFOpen(sPDFDoc, this);
+            sFilePath = sPDFDoc.getDocPath();
+            mPDFView.PDFOpen(mPDFDoc, this);
+            mFilePath = mPDFDoc.getDocPath();
+        } else {
+            Toast.makeText(getApplicationContext(), R.string.pdf_fail_open, Toast.LENGTH_SHORT).show();
+        }
+    }
     /**
      * inClickListener is the OnClickListener for the inkButton.
      * When the inkButton is clicked, the ink annotation mode is toggled.
@@ -470,13 +606,22 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      */
     @Override
     protected void onDestroy() {
-        if (mPDFDoc != null) {
+        closePDFs();
+        super.onDestroy();
+    }
+
+    /**
+     * closePDFs is used to close the PDF documents.
+     */
+    private void closePDFs(){
+        if (mPDFDoc != null && sPDFDoc != null) {
             sPDFView.PDFClose();
             mPDFDoc.Close();
             mPDFView.PDFClose();
+            sPDFDoc.Close();
             mPDFDoc = null;
+            sPDFDoc = null;
+            Global.RemoveTmp();
         }
-        Global.RemoveTmp();
-        super.onDestroy();
     }
 }

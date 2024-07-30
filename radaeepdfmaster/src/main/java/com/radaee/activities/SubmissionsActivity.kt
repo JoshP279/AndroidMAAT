@@ -33,13 +33,17 @@ import java.io.File
  * When a submission is clicked, the user is taken to the PDFReaderActivity where they can view the submission and memo PDFs.
  */
 class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUpdateListener{
+    companion object{
+        var filteredSubmissions = ArrayList<SubmissionsResponse>()
+        var curPos = -1
+    }
     private lateinit var submissionsAssessmentNameTextView: TextView
     private lateinit var submissionsRecyclerView: RecyclerView
     private lateinit var submissionsSearchView: SearchView
     private lateinit var adapter: SubmissionsAdapter
     private var assessmentID: Int = 0
     private  var submissions = ArrayList<SubmissionsResponse>()
-    private  var filteredSubmissions = ArrayList<SubmissionsResponse>()
+
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var submissionsHelper: TextView
     private lateinit var filterSpinner: Spinner
@@ -159,6 +163,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
      * 4. Neither the submission PDF nor the memo PDF exists. Download both PDFs and proceed to the PDFReaderActivity.
      */
     private val submissionOnClickListener = SubmissionsAdapter.OnItemClickListener { position ->
+        curPos = position
         val submission = filteredSubmissions[position]
         val folderName = "Assessment_${assessmentID}"
         val submissionFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
