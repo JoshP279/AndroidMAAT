@@ -56,6 +56,8 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      */
     static public Document submission;
     static public Document memo;
+    static public List<SubmissionsResponse> filteredSubmissions;
+    static public int currentPos;
     private boolean m_modified = false;
     private boolean need_save_doc = false;
     private Document sPDFDoc = null;
@@ -69,6 +71,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private int m_cur_page = 0;
     private ImageButton inkButton;
     private boolean inked = false;
+    private boolean texted = false;
     private ImageButton undoButton;
     private ImageButton redoButton;
     private ImageButton saveButton;
@@ -80,14 +83,11 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private String studentNumber;
     private int submissionID;
     private int assessmentID;
-    private int currentPos = 0;
-    private List<SubmissionsResponse> filteredSubmissions;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         /// Initialize the Global class for the RadaeePDFSDK. This is required to use the SDK.
         Global.Init(this);
-        currentPos = SubmissionsActivity.Companion.getCurPos();
         setContentView(R.layout.activity_pdf_reader);
         rootLayout = findViewById(R.id.root);
         divider = findViewById(R.id.divider);
@@ -100,19 +100,18 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         saveButton = findViewById(R.id.saveButton);
         commentButton = findViewById(R.id.commentButton);
         bookmarkButton = findViewById(R.id.bookMarkButton);
-        filteredSubmissions = SubmissionsActivity.Companion.getFilteredSubmissions();
         prevSubmissionButton = findViewById(R.id.btnPrevSubmission);
         nextSubmissionButton = findViewById(R.id.btnNextSubmission);
         nextSubmissionButton.setOnClickListener(submissionClickListener);
         prevSubmissionButton.setOnClickListener(submissionClickListener);
-        prevSubmissionButton.setEnabled(currentPos>0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size());
-        nextSubmissionButton.setEnabled(currentPos>=0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size()-1);
+        prevSubmissionButton.setEnabled(currentPos>0 && currentPos < filteredSubmissions.size());
+        nextSubmissionButton.setEnabled(currentPos>=0 && currentPos < filteredSubmissions.size()-1);
         inkButton.setOnClickListener(inkClickListener);
         undoButton.setOnClickListener(undoClickListener);
         redoButton.setOnClickListener(redoClickListener);
         saveButton.setOnClickListener(saveClickListener);
         bookmarkButton.setOnClickListener(bookmarkClickListener);
-        commentButton.setOnClickListener(commentClickListener);
+        commentButton.setOnClickListener(textClickListener);
         setupDivider();
         Intent intent = getIntent();
         // Get the student number, submission ID and assessment ID from the intent.
@@ -141,25 +140,24 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      */
     private final View.OnClickListener submissionClickListener = v -> {
         int nextPos = -1;
-        if (currentPos >= 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size()) {
+        if (currentPos >= 0 && currentPos < filteredSubmissions.size()) {
             Log.e("size", String.valueOf(filteredSubmissions.size()));
-            SubmissionsResponse submission = filteredSubmissions.get(currentPos);
-            if (currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size())
+            if (currentPos < filteredSubmissions.size())
                 nextPos = switch (v.getId()) {
                     case R.id.btnNextSubmission -> currentPos + 1;
                     case R.id.btnPrevSubmission -> currentPos - 1;
                     default -> nextPos;
                 };
             if (nextPos != -1) {
-                SubmissionsActivity.Companion.setCurPos(nextPos);
-                currentPos = SubmissionsActivity.Companion.getCurPos();
-                prevSubmissionButton.setEnabled(currentPos > 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size());
-                nextSubmissionButton.setEnabled(currentPos >= 0 && currentPos < SubmissionsActivity.Companion.getFilteredSubmissions().size() - 1);
+                currentPos = nextPos;
+                Log.e("current",currentPos+"");
+                prevSubmissionButton.setEnabled(currentPos > 0 && currentPos < filteredSubmissions.size());
+                nextSubmissionButton.setEnabled(currentPos >= 0 && currentPos <filteredSubmissions.size() - 1);
+                SubmissionsResponse submission = filteredSubmissions.get(currentPos);
                 openSubmission(submission);
             }
         }
     };
-
     /**
      * openSubmission is used to open the submission and memo for the current student.
      * @param submission - the current submission with relevant information
@@ -245,6 +243,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
 //        int err2 = mPDFDoc.Open(mPath, null);
         if (err1 == 0) {
             sPDFView.PDFOpen(sPDFDoc, PDFReaderActivity.this);
+            sPDFView.PDFGotoPage(0);
             sFilePath = sPDFDoc.getDocPath();
 //            mPDFView.PDFOpen(mPDFDoc, PDFReaderActivity.this);
 //            mFilePath = mPDFDoc.getDocPath();
@@ -348,10 +347,20 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     /**
      * commentClickListener is the OnClickListener for the commentButton.
      */
-    private final View.OnClickListener commentClickListener = v -> {
-        sPDFView.PDFSetFieldEditbox(0);
+    private final View.OnClickListener textClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (!texted){
+                sPDFView.PDFSetEditbox(0);
+            }else{
+                sPDFView.PDFSetEditbox(1);
+            }
+            mStatus = Status.text_box;
+            m_modified = true;
+            texted = !texted;
+        }
     };
-
+//Does not work currently
 //    private final View.OnClickListener commentsClickListener = v -> {
 //        if (!PDFEditView.inkHashMap.isEmpty()) {
 //            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());

@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="radaeepdfmaster">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-07-24T06:06:23.518498600Z">
+        <DropdownSelection timestamp="2024-08-01T09:29:16.873654200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Joshua\.android\avd\Medium_Tablet_API_34.avd" />

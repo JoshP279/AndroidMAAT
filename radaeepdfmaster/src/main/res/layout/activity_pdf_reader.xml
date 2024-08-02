@@ -95,6 +95,7 @@
             android:scaleType="fitCenter"
             app:layout_constraintStart_toEndOf="@+id/bookMarkButton"
             app:layout_constraintTop_toTopOf="parent" />
+
     </LinearLayout>
 
     <View

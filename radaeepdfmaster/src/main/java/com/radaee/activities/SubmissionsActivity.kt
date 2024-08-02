@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.AdapterView
@@ -38,17 +37,13 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
      * The companion object contains the filtered submissions and the current position of the submission clicked.
      * This is used to ensure that the correct submission is opened in the PDFReaderActivity.
      */
-    companion object{
-        var filteredSubmissions = ArrayList<SubmissionsResponse>()
-        var curPos = -1
-    }
     private lateinit var submissionsAssessmentNameTextView: TextView
     private lateinit var submissionsRecyclerView: RecyclerView
     private lateinit var submissionsSearchView: SearchView
     private lateinit var adapter: SubmissionsAdapter
     private var assessmentID: Int = 0
     private  var submissions = ArrayList<SubmissionsResponse>()
-
+    private var filteredSubmissions = ArrayList<SubmissionsResponse>()
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var submissionsHelper: TextView
     private lateinit var filterSpinner: Spinner
@@ -168,8 +163,6 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
      * 4. Neither the submission PDF nor the memo PDF exists. Download both PDFs and proceed to the PDFReaderActivity.
      */
     private val submissionOnClickListener = SubmissionsAdapter.OnItemClickListener { position ->
-        curPos = position
-        Log.e("SubmissionsActivity", "Position: $position")
         val submission = filteredSubmissions[position]
         val folderName = "Assessment_${assessmentID}"
         val submissionFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
@@ -179,11 +172,11 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         val sFile = File(submissionFile, submissionName)
         val mFile = File(memoFile, memoName)
         if (FileUtil.checkSubmissionExists(submissionFile, submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
-            initPDFReaderIntent(sFile.path,mFile.path, submission.studentNumber, submission.submissionID)
+            initPDFReaderIntent(sFile.path,mFile.path, submission.studentNumber, submission.submissionID, position)
         }else if (!FileUtil.checkSubmissionExists(submissionFile, submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
             RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submission.studentNumber, folderName) { path ->
                 if (path != null) {
-                    initPDFReaderIntent(path, mFile.path, submission.studentNumber, submission.submissionID)
+                    initPDFReaderIntent(path, mFile.path, submission.studentNumber, submission.submissionID, position)
                 } else {
                     Toast.makeText(applicationContext, R.string.pdf_fail_download, Toast.LENGTH_SHORT).show()
                 }
@@ -191,7 +184,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         }else if (FileUtil.checkSubmissionExists(submissionFile, submission.studentNumber) && !FileUtil.checkMemoExists(memoFile,assessmentID)){
             RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,assessmentID, folderName) {path ->
                 if (path != null) {
-                    initPDFReaderIntent(sFile.path, path, submission.studentNumber, submission.submissionID)
+                    initPDFReaderIntent(sFile.path, path, submission.studentNumber, submission.submissionID, position)
                 } else {
                     Toast.makeText(applicationContext, R.string.pdf_fail_download, Toast.LENGTH_SHORT).show()
                 }
@@ -200,7 +193,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submission.studentNumber, folderName) { sPath ->
                 RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,assessmentID, folderName) {mPath ->
                     if (sPath != null && mPath != null) {
-                        initPDFReaderIntent(sPath, mPath, submission.studentNumber, submission.submissionID)
+                        initPDFReaderIntent(sPath, mPath, submission.studentNumber, submission.submissionID, position)
                     } else {
                         Toast.makeText(applicationContext, R.string.pdf_fail_download, Toast.LENGTH_SHORT).show()
                     }
@@ -211,7 +204,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
     /**
      * This function initializes the PDFReaderActivity with the submission and memo PDFs. Attaches both PDFs to the intent, as well studentNum, submissionID, and assessmentID.
      */
-    private fun initPDFReaderIntent(sPath:String,mPath: String,studentNumber: String, submissionID: Int){
+    private fun initPDFReaderIntent(sPath:String,mPath: String,studentNumber: String, submissionID: Int, position: Int){
         //Note that these Document objects are custom objects, used to open PDFs with the RadaeePDFSDK.
         submissionPDF = Document()
         memoPDF = Document()
@@ -220,6 +213,8 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         if (err1 == 0 && err2 == 0){
             PDFReaderActivity.submission = submissionPDF
             PDFReaderActivity.memo = memoPDF
+            PDFReaderActivity.filteredSubmissions = filteredSubmissions;
+            PDFReaderActivity.currentPos = position
             val intent = Intent(applicationContext, PDFReaderActivity::class.java)
             intent.putExtra("studentNum", studentNumber)
             intent.putExtra("submissionID", submissionID)
