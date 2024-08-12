@@ -1,9 +1,8 @@
 package com.radaee.fragments
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,9 +16,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.radaee.activities.SubmissionsActivity
 import com.radaee.adapters.AssessmentsAdapter
 import com.radaee.dataclasses.AssessmentResponse
-import com.radaee.objects.RetrofitClient
-import com.radaee.pdfmaster.R
 import com.radaee.decorators.EqualSpaceItemDecoration
+import com.radaee.objects.RetrofitClient
+import com.radaee.objects.SharedPref
+import com.radaee.pdfmaster.R
+import java.io.File
 
 /**
  * ViewAssessmentsFragment is a fragment that displays a list of assessments that the marker is assigned to.
@@ -32,7 +33,6 @@ class ViewAssessmentsFragment : Fragment() {
     private var filteredAssessments = ArrayList<AssessmentResponse>()
     private lateinit var searchView: SearchView
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var sharedPref: SharedPreferences
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -42,7 +42,6 @@ class ViewAssessmentsFragment : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sharedPref = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
         assessmentsList = view.findViewById(R.id.assessmentsRecyclerView)
         searchView = view.findViewById(R.id.assessmentSearchView)
         assessmentHelper = view.findViewById(R.id.assessmentsHelper)
@@ -79,9 +78,14 @@ class ViewAssessmentsFragment : Fragment() {
      */
     private fun setUpRecyclerView() {
         assessmentsList.layoutManager = GridLayoutManager(requireContext(), 2)
-        RetrofitClient.loadAssessments(requireContext(),assessments,filteredAssessments,assessmentsList)
         adapter = AssessmentsAdapter(filteredAssessments, requireContext())
         assessmentsList.adapter = adapter
+        if (SharedPref.getBoolean(requireContext(), "OFFLINE_MODE", false)) {
+            loadOfflineAssessments()
+        }
+        else{
+            RetrofitClient.loadAssessments(requireContext(),assessments,filteredAssessments,assessmentsList)
+        }
         assessmentsList.addItemDecoration(EqualSpaceItemDecoration(10))
         (assessmentsList.adapter as AssessmentsAdapter).setOnItemClickListener(object :
             AssessmentsAdapter.OnItemClickListener {
@@ -90,11 +94,41 @@ class ViewAssessmentsFragment : Fragment() {
                 val intent = Intent(requireContext(), SubmissionsActivity::class.java)
                 intent.putExtra("assessmentName",assessment.assessmentName)
                 intent.putExtra("assessmentID", assessment.assessmentID)
+                intent.putExtra("moduleCode", assessment.moduleCode)
                 startActivity(intent)
             }
         })
     }
 
+    /**
+     * Loads the assessments that are stored offline on the device.
+     * Only called if the user is in offline mode.
+     */
+    private fun loadOfflineAssessments(){
+        val documentsDirectory = File(Environment.getExternalStorageDirectory(), "Documents")
+        if (documentsDirectory.exists() && documentsDirectory.isDirectory) {
+            // List all files in the directory
+            val files = documentsDirectory.listFiles()
+            val assessmentDirectories = files?.filter { it.isDirectory } ?: emptyList()
+            assessments.clear()
+
+            filteredAssessments.clear()
+            for (directory in assessmentDirectories) {
+                val assessmentName = directory.name
+                val elem = assessmentName.split("_")
+                val assessment = AssessmentResponse(
+                    assessmentName = elem[2],
+                    assessmentID = elem[0].toInt(),
+                    moduleCode = elem[1],
+                    totalSubmissions = 0,
+                    numMarked = 0
+                )
+                assessments.add(assessment)
+            }
+            filteredAssessments.addAll(assessments)
+            adapter.notifyDataSetChanged()
+        }
+    }
     /**
      * Sets up the search view that allows the user to search for assessments by module code or assessment name.
      */

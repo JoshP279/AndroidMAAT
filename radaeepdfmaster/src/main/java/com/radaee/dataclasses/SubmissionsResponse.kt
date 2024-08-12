@@ -15,5 +15,6 @@ data class SubmissionsResponse(
     val studentNumber: String,
     val studentName: String,
     val studentSurname:String,
-    val submissionStatus: String
+    val submissionStatus: String,
+    val submissionFolderName: String
 )

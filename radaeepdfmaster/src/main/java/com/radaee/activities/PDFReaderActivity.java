@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,11 +77,13 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private ImageButton bookmarkButton;
     private ImageButton commentButton;
     private TextView studentNum;
-    private Button nextSubmissionButton;
-    private Button prevSubmissionButton;
+    private ImageButton nextSubmissionButton;
+    private ImageButton prevSubmissionButton;
     private String studentNumber;
     private int submissionID;
     private int assessmentID;
+    private String assessmentName;
+    private String moduleCode;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +113,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         saveButton.setOnClickListener(saveClickListener);
         bookmarkButton.setOnClickListener(bookmarkClickListener);
         commentButton.setOnClickListener(textClickListener);
+        Log.e("check", currentPos + " " );
+        prevSubmissionButton.setVisibility(currentPos == 0 ? View.INVISIBLE : View.VISIBLE);
+        nextSubmissionButton.setVisibility(currentPos == filteredSubmissions.size() - 1 ? View.INVISIBLE : View.VISIBLE);
         setupDivider();
         Intent intent = getIntent();
         // Get the student number, submission ID and assessment ID from the intent.
@@ -120,6 +124,8 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             studentNum.setText(studentNumber);
             submissionID = intent.getIntExtra("submissionID", 1);
             assessmentID = intent.getIntExtra("assessmentID", 1);
+            assessmentName = intent.getStringExtra("assessmentName");
+            moduleCode = intent.getStringExtra("moduleCode");
         }
         if (submission != null && memo != null) {
             mPDFDoc = memo;
@@ -141,7 +147,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private final View.OnClickListener submissionClickListener = v -> {
         int nextPos = -1;
         if (currentPos >= 0 && currentPos < filteredSubmissions.size()) {
-            Log.e("size", String.valueOf(filteredSubmissions.size()));
             if (currentPos < filteredSubmissions.size())
                 nextPos = switch (v.getId()) {
                     case R.id.btnNextSubmission -> currentPos + 1;
@@ -150,9 +155,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 };
             if (nextPos != -1) {
                 currentPos = nextPos;
-                Log.e("current",currentPos+"");
                 prevSubmissionButton.setEnabled(currentPos > 0 && currentPos < filteredSubmissions.size());
+                prevSubmissionButton.setVisibility(currentPos == 0 ? View.INVISIBLE : View.VISIBLE);
                 nextSubmissionButton.setEnabled(currentPos >= 0 && currentPos <filteredSubmissions.size() - 1);
+                nextSubmissionButton.setVisibility(currentPos == filteredSubmissions.size() - 1 ? View.INVISIBLE : View.VISIBLE);
                 SubmissionsResponse submission = filteredSubmissions.get(currentPos);
                 openSubmission(submission);
             }
@@ -166,14 +172,13 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private void openSubmission(SubmissionsResponse submission) {
         studentNumber = submission.getStudentNumber();
         submissionID = submission.getSubmissionID();
-        assessmentID = submission.getAssessmentID(); //assessmentID should not change, sanity check
+        assessmentID = submission.getAssessmentID();
         studentNum.setText(studentNumber);
-        String folderName = "Assessment_" + assessmentID;
+        String folderName = assessmentID + "_" + moduleCode + "_" + assessmentName;
         File submissionFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
         File memoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
-        String submissionName = "submission_" + submission.getStudentNumber() + ".pdf";
         String memoName = "memo_" + assessmentID + ".pdf";
-        File sFile = new File(submissionFile, submissionName);
+        File sFile = new File(submissionFile, submission.getSubmissionFolderName());
         File mFile = new File(memoFile, memoName);
         checkAndDownloadPDFs(submissionFile, memoFile, folderName, sFile, mFile, submission);
     }
@@ -189,10 +194,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      * @param submission - the current submission with relevant information
      */
     private void checkAndDownloadPDFs(File submissionFile, File memoFile, String folderName, File sFile, File mFile, SubmissionsResponse submission) {
-        if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+        if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getSubmissionFolderName(), submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             initPDFReader(sFile.getPath(), mFile.getPath());
-        } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
-            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getStudentNumber(), folderName, path -> {
+        } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getSubmissionFolderName(),submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getSubmissionFolderName(), folderName, path -> {
                 if (path != null) {
                     initPDFReader(path, mFile.getPath());
                 } else {
@@ -200,7 +205,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 }
                 return null;
             });
-        } else if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getStudentNumber()) && !FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+        } else if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile,submission.getSubmissionFolderName(), submission.getStudentNumber()) && !FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             RetrofitClient.INSTANCE.downloadMemoPDF(this, assessmentID, folderName, path -> {
                 if (path != null) {
                     initPDFReader(sFile.getPath(), path);
@@ -210,7 +215,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 return null;
             });
         } else {
-            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getStudentNumber(), folderName, sPath -> {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getSubmissionFolderName(), folderName, sPath -> {
                 if (sPath != null) {
                     RetrofitClient.INSTANCE.downloadMemoPDF(this, assessmentID, folderName, mPath -> {
                         if (mPath != null) {

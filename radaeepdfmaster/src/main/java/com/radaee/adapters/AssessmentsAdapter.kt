@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.dataclasses.AssessmentResponse
+import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
 
 /**
@@ -32,6 +33,10 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
         holder.assessmentNameTextView.text = item.assessmentName
         holder.assessmentTotalSubmissionsTextView.text = String.format(context.getString(R.string.submissions_marked), item.totalSubmissions)
         holder.assessmentNumMarkedTextView.text =  String.format(item.numMarked.toString() + "/")
+        if (SharedPref.getBoolean(context, "OFFLINE_MODE", false)) {
+            holder.assessmentTotalSubmissionsTextView.visibility = View.INVISIBLE
+            holder.assessmentNumMarkedTextView.visibility = View.INVISIBLE
+        }
         holder.bind(item)
     }
     override fun getItemCount() = mList.size

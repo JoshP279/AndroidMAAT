@@ -30,6 +30,7 @@ import com.radaee.pdfmaster.R
 
 class LogInActivity : AppCompatActivity() {
     private lateinit var loginBtn: Button
+    private lateinit var offlineBtn: Button
     private lateinit var emailTextview: TextView
     private lateinit var passwordTextView: TextView
     private lateinit var headingTextView: TextView
@@ -45,6 +46,7 @@ class LogInActivity : AppCompatActivity() {
         //Saves the dark mode preference of the user. If the user has enabled dark mode, it will be saved as true, else false. Will also be true if the user's operating system is in dark mode.
         SharedPref.saveBoolean(this,"DARK_MODE",(resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
         loginBtn = findViewById(R.id.loginBtn)
+        offlineBtn = findViewById(R.id.btnOffline)
         emailTextview = findViewById(R.id.loginEmail)
         passwordTextView = findViewById(R.id.loginPassword)
         headingTextView = findViewById(R.id.headingTxtView)
@@ -57,6 +59,11 @@ class LogInActivity : AppCompatActivity() {
         val colorSpan = ForegroundColorSpan(resources.getColor(R.color.colorPrimary, null))
         spannableString.setSpan(colorSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
         headingTextView.text = spannableString
+        offlineBtn.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            SharedPref.saveBoolean(this,"OFFLINE_MODE",true)
+            startActivity(intent)
+        }
         loginBtn.setOnClickListener {
             val email = emailTextview.text.toString()
             val password = passwordTextView.text.toString()

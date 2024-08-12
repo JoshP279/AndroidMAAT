@@ -91,7 +91,7 @@
     <string name="assessments">Assessments</string>
     <string name="helperHeading">What does this screen do?</string>
     <string name="assessmentsHelperMessage">This screen displays the assessments that you are able to mark. Only the assessments that you have been added as a marker will be displayed.</string>
-    <string name="logInHelperMessage">Log in with your university credentials (email and password) to proceed.</string>
+    <string name="logInHelperMessage">Log in with your university credentials (email and password) to proceed. Offline marking will allow you to assess previously downloaded scripts</string>
     <string name="aboutHelperMessage">This screen displays some basic information about MAAT.</string>
     <string name="helpHelperMessage">This screen displays some basic information about every screen throughout the app Look at the top right corner if you are unsure about the purpose of the screen you are currently on.</string>
     <string name="settingsHelperMessage">This screen displays some of the settings you can change to customise the app to your liking. Try switching themes, changing the language, and selecting your marking style.</string>
@@ -160,4 +160,5 @@
     <string name="app_exit_header">Exit app</string>
     <string name="app_exit_msg">Are you sure you want to exit?</string>
     <string name="invalid_username_or_password">Invalid username or password</string>
+    <string name="offline_marking">Offline Marking</string>
 </resources>

@@ -21,14 +21,13 @@ object FileUtil {
      * @param documentsDir the documents directory to save the file in
      * @return the absolute path of the saved file, or null if the file could not be saved
      */
-    fun saveSubmissionPDF(context: Context, pdfData: ByteArray, studentNumber: String, documentsDir: File): String? {
+    fun saveSubmissionPDF(context: Context, pdfData: ByteArray, submissionFolderName: String, documentsDir: File): String? {
         return try {
-            val fileName = "submission_$studentNumber.pdf"
-            val file = File(documentsDir, fileName)
+            val file = File(documentsDir, submissionFolderName)
             val fos = FileOutputStream(file)
             fos.write(pdfData)
             fos.close()
-            Toast.makeText(context, context.getString(R.string.pdf_saved_message, fileName, documentsDir), Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.pdf_saved_message, submissionFolderName, documentsDir), Toast.LENGTH_SHORT).show()
             file.absolutePath
         } catch (e: IOException) {
             e.printStackTrace()
@@ -67,8 +66,7 @@ object FileUtil {
      * @param studentNumber the student number to check for
      * @return true if the file exists, false otherwise
      */
-    fun checkSubmissionExists(folderPath: File, studentNumber: String): Boolean {
-        val fileName = "submission_$studentNumber.pdf"
+    fun checkSubmissionExists(folderPath: File, fileName: String, studentNumber: String): Boolean {
         val file = File(folderPath, fileName)
         return file.exists()
     }
