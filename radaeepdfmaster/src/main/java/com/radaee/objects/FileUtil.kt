@@ -2,7 +2,6 @@ package com.radaee.objects
 
 import android.content.Context
 import android.os.Environment
-import android.util.Log
 import android.widget.Toast
 import com.radaee.pdfmaster.R
 import java.io.File
@@ -17,11 +16,11 @@ object FileUtil {
      * Save the PDF data to a file in the documents directory.
      * @param context the context of the activity or fragment (necessary for displaying toasts)
      * @param pdfData the PDF data to save
-     * @param studentNumber the student number to use in the file name
+     * @param submissionID the submission ID to use in the file name
      * @param documentsDir the documents directory to save the file in
      * @return the absolute path of the saved file, or null if the file could not be saved
      */
-    fun saveSubmissionPDF(context: Context, pdfData: ByteArray, submissionFolderName: String, documentsDir: File): String? {
+    fun saveSubmissionPDF(context: Context, pdfData: ByteArray,submissionFolderName: String, documentsDir: File): String? {
         return try {
             val file = File(documentsDir, submissionFolderName)
             val fos = FileOutputStream(file)

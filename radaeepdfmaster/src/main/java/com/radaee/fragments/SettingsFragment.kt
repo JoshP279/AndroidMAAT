@@ -1,5 +1,6 @@
 package com.radaee.fragments
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,12 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import com.radaee.activities.LogInActivity
 import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
 import java.util.Locale
@@ -26,6 +29,7 @@ class SettingsFragment : Fragment() {
     private lateinit var languageSpinner: Spinner
     private lateinit var markingChoiceSpinner: Spinner
     private lateinit var settingsHelper: TextView
+    private lateinit var logoutBtn: Button
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -35,6 +39,11 @@ class SettingsFragment : Fragment() {
         languageSpinner = view.findViewById(R.id.language_spinner)
         markingChoiceSpinner = view.findViewById(R.id.markingstyle_spinner)
         settingsHelper = view.findViewById(R.id.settingsHelper)
+        logoutBtn = view.findViewById(R.id.btnLogout)
+
+        logoutBtn.setOnClickListener{
+            logOut()
+        }
         settingsHelper.setOnClickListener{
             displayHelperDialog()
         }
@@ -119,5 +128,15 @@ class SettingsFragment : Fragment() {
         config.setLocale(locale)
         resources.updateConfiguration(config, resources.displayMetrics)
         activity?.recreate()
+    }
+
+    /**
+     * Logs the user out of the app.
+     */
+    private fun logOut() {
+        val intent: Intent = Intent(requireContext(), LogInActivity::class.java)
+        startActivity(intent)
+        activity?.finish()
+
     }
 }

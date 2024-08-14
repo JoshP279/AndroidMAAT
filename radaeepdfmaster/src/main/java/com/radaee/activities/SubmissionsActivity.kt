@@ -174,7 +174,6 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         (submissionsRecyclerView.adapter as SubmissionsAdapter).setOnItemClickListener(submissionOnClickListener)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun loadOfflineSubmissions() {
         val folderName = "${assessmentID}_${moduleCode}_${assessmentName}"
         val submissionsDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
@@ -183,32 +182,32 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             val submissionFiles = submissionsDir.listFiles()
             submissions.clear()
             filteredSubmissions.clear()
+
             submissionFiles?.forEach { file ->
-                if (file.isDirectory || file.name.startsWith("s")) {
-                    val studentInfo = file.name.split("_")
-                    if (studentInfo.size > 1) {
-                        val studentNumber = studentInfo[0].substringAfter("s")
-                        val names = studentInfo[1].split(" ")
-                        val studentSurname = names[0]
-                        val studentName = names.drop(1).joinToString(" ")
-                        val submission = SubmissionsResponse(
-                            submissionID = 1,
-                            assessmentID = assessmentID,
-                            studentNumber = studentNumber,
-                            studentName = studentName,
-                            studentSurname = studentSurname,
-                            submissionStatus = getString(R.string.unmarked),
-                            submissionFolderName = file.name
-                        )
-                        submissions.add(submission)
-                    }
+                // Check to ignore memo files
+                if (!file.name.startsWith("memo_")) {
+                    val fileName = file.name
+                    val studentInfo = fileName.split("_")
+                    val studentNumber = studentInfo[1].substringBefore("-").removePrefix("s")
+                    val names = studentInfo[1].substringAfter("-").split(" ")
+                    val studentName = names[0]
+                    val studentSurname = names.drop(1).joinToString(" ")
+
+                    val submission = SubmissionsResponse(
+                        submissionID = studentInfo[0].toInt(),
+                        assessmentID = assessmentID,
+                        studentNumber = studentNumber,
+                        studentName = studentName,
+                        studentSurname = studentSurname,
+                        submissionStatus = getString(R.string.unmarked),
+                        submissionFolderName = file.name
+                    )
+
+                    Log.e("SubmissionsActivity", "Submission: $submission")
+                    submissions.add(submission)
                 }
             }
-
             filteredSubmissions.addAll(submissions)
-
-            Log.d("SubmissionsActivity", "Submissions Size: ${submissions.size}")
-            Log.d("SubmissionsActivity", "Filtered Submissions Size: ${filteredSubmissions.size}")
             adapter.notifyDataSetChanged()
 
         } else {
@@ -227,21 +226,22 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         val submission = filteredSubmissions[position]
         val folderName = assessmentID.toString() + "_" + moduleCode + "_" + assessmentName
         val submissionFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
+        val submissionFileName = submission.submissionID.toString() + "_" + submission.submissionFolderName
         val memoFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
         val memoName = "memo_${assessmentID}.pdf"
         val sFile = File(submissionFile, submission.submissionFolderName)
-        val mFile = File(memoFile, memoName);
+        val mFile = File(memoFile, memoName)
         if (FileUtil.checkSubmissionExists(submissionFile, submission.submissionFolderName, submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
             initPDFReaderIntent(sFile.path,mFile.path, submission.studentNumber, submission.submissionID, position)
         }else if (!FileUtil.checkSubmissionExists(submissionFile, submission.submissionFolderName,submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
-            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submission.submissionFolderName, folderName) { path ->
+            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submissionFileName, folderName) { path ->
                 if (path != null) {
                     initPDFReaderIntent(path, mFile.path, submission.studentNumber, submission.submissionID, position)
                 } else {
                     Toast.makeText(applicationContext, R.string.pdf_fail_download, Toast.LENGTH_SHORT).show()
                 }
             }
-        }else if (FileUtil.checkSubmissionExists(submissionFile, submission.submissionFolderName,  submission.studentNumber) && !FileUtil.checkMemoExists(memoFile,assessmentID)){
+        }else if (FileUtil.checkSubmissionExists(submissionFile, submissionFileName,  submission.studentNumber) && !FileUtil.checkMemoExists(memoFile,assessmentID)){
             RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,assessmentID, folderName) {path ->
                 if (path != null) {
                     initPDFReaderIntent(sFile.path, path, submission.studentNumber, submission.submissionID, position)
@@ -250,7 +250,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
                 }
             }
         }else{
-            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submission.submissionFolderName, folderName) { sPath ->
+            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submissionFileName, folderName) { sPath ->
                 RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,assessmentID, folderName) {mPath ->
                     if (sPath != null && mPath != null) {
                         initPDFReaderIntent(sPath, mPath, submission.studentNumber, submission.submissionID, position)
@@ -274,7 +274,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         if (err1 == 0 && err2 == 0){
             PDFReaderActivity.submission = submissionPDF
             PDFReaderActivity.memo = memoPDF
-            PDFReaderActivity.filteredSubmissions = filteredSubmissions;
+            PDFReaderActivity.filteredSubmissions = filteredSubmissions
             PDFReaderActivity.currentPos = position
             val intent = Intent(applicationContext, PDFReaderActivity::class.java)
             intent.putExtra("studentNum", studentNumber)

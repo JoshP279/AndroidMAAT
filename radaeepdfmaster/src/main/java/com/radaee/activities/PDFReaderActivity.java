@@ -194,9 +194,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      * @param submission - the current submission with relevant information
      */
     private void checkAndDownloadPDFs(File submissionFile, File memoFile, String folderName, File sFile, File mFile, SubmissionsResponse submission) {
-        if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getSubmissionFolderName(), submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+        String submissionName = submission.getSubmissionID() + "_" + submission.getSubmissionFolderName();
+        if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             initPDFReader(sFile.getPath(), mFile.getPath());
-        } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submission.getSubmissionFolderName(),submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+        } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName,submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getSubmissionFolderName(), folderName, path -> {
                 if (path != null) {
                     initPDFReader(path, mFile.getPath());
@@ -205,7 +206,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 }
                 return null;
             });
-        } else if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile,submission.getSubmissionFolderName(), submission.getStudentNumber()) && !FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
+        } else if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile,submissionName, submission.getStudentNumber()) && !FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             RetrofitClient.INSTANCE.downloadMemoPDF(this, assessmentID, folderName, path -> {
                 if (path != null) {
                     initPDFReader(sFile.getPath(), path);
@@ -215,7 +216,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 return null;
             });
         } else {
-            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getSubmissionFolderName(), folderName, sPath -> {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submissionName, folderName, sPath -> {
                 if (sPath != null) {
                     RetrofitClient.INSTANCE.downloadMemoPDF(this, assessmentID, folderName, mPath -> {
                         if (mPath != null) {
