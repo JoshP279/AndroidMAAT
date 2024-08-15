@@ -178,7 +178,8 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         File submissionFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
         File memoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
         String memoName = "memo_" + assessmentID + ".pdf";
-        File sFile = new File(submissionFile, submission.getSubmissionFolderName());
+        Log.e("path",submissionID + "_" + submission.getSubmissionFolderName() );
+        File sFile = new File(submissionFile, submissionID + "_" + submission.getSubmissionFolderName());
         File mFile = new File(memoFile, memoName);
         checkAndDownloadPDFs(submissionFile, memoFile, folderName, sFile, mFile, submission);
     }
@@ -198,7 +199,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             initPDFReader(sFile.getPath(), mFile.getPath());
         } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName,submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
-            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submission.getSubmissionFolderName(), folderName, path -> {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submissionName, folderName, path -> {
                 if (path != null) {
                     initPDFReader(path, mFile.getPath());
                 } else {

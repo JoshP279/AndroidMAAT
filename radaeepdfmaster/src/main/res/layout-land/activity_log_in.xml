@@ -26,7 +26,7 @@
         android:id="@+id/loginEmail"
         android:layout_width="500dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="30dp"
         android:ems="10"
         android:hint="@string/enter_email_address"
         android:inputType="textEmailAddress"
@@ -61,9 +61,9 @@
 
     <Button
         android:id="@+id/btnOffline"
-        android:layout_width="135dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="10dp"
         android:text="@string/offline_marking"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -74,7 +74,6 @@
         android:id="@+id/headingTxtView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
         android:gravity="center_horizontal"
         android:text="@string/app_name"
         android:textSize="200sp"

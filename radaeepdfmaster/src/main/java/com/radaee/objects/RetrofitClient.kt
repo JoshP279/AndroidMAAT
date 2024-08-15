@@ -4,6 +4,7 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.activities.LogInActivity

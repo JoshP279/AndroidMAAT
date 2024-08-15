@@ -161,4 +161,5 @@
     <string name="app_exit_msg">Are you sure you want to exit?</string>
     <string name="invalid_username_or_password">Invalid username or password</string>
     <string name="offline_marking">Offline Marking</string>
+    <string name="no_offline_submissions">No offline submissions found</string>
 </resources>

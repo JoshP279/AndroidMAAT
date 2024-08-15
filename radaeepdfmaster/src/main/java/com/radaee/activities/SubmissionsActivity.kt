@@ -1,12 +1,10 @@
 package com.radaee.activities
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.AdapterView
@@ -162,8 +160,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         adapter = SubmissionsAdapter(filteredSubmissions, this)
         submissionsRecyclerView.adapter = adapter
         adapter.setSubmissionUpdateListener(this)
-        if (SharedPref.getBoolean(this, "OFFLINE_MODE", false)) {
-            Log.e("SubmissionsActivity", "Offline Mode")
+        if (SharedPref.getBoolean(this, "OFFLINE_MODE", true)) {
             loadOfflineSubmissions()
         }
         else{
@@ -184,7 +181,6 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             filteredSubmissions.clear()
 
             submissionFiles?.forEach { file ->
-                // Check to ignore memo files
                 if (!file.name.startsWith("memo_")) {
                     val fileName = file.name
                     val studentInfo = fileName.split("_")
@@ -200,10 +196,8 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
                         studentName = studentName,
                         studentSurname = studentSurname,
                         submissionStatus = getString(R.string.unmarked),
-                        submissionFolderName = file.name
+                        submissionFolderName = fileName.substringAfter("_")
                     )
-
-                    Log.e("SubmissionsActivity", "Submission: $submission")
                     submissions.add(submission)
                 }
             }
@@ -211,7 +205,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             adapter.notifyDataSetChanged()
 
         } else {
-            Toast.makeText(this, "No offline submissions found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.no_offline_submissions, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -229,11 +223,11 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         val submissionFileName = submission.submissionID.toString() + "_" + submission.submissionFolderName
         val memoFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
         val memoName = "memo_${assessmentID}.pdf"
-        val sFile = File(submissionFile, submission.submissionFolderName)
+        val sFile = File(submissionFile, submissionFileName)
         val mFile = File(memoFile, memoName)
-        if (FileUtil.checkSubmissionExists(submissionFile, submission.submissionFolderName, submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
+        if (FileUtil.checkSubmissionExists(submissionFile, submissionFileName, submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
             initPDFReaderIntent(sFile.path,mFile.path, submission.studentNumber, submission.submissionID, position)
-        }else if (!FileUtil.checkSubmissionExists(submissionFile, submission.submissionFolderName,submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
+        }else if (!FileUtil.checkSubmissionExists(submissionFile, submissionFileName,submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
             RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submissionFileName, folderName) { path ->
                 if (path != null) {
                     initPDFReaderIntent(path, mFile.path, submission.studentNumber, submission.submissionID, position)

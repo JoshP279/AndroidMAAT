@@ -36,6 +36,9 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
         if (SharedPref.getBoolean(context, "OFFLINE_MODE", false)) {
             holder.assessmentTotalSubmissionsTextView.visibility = View.INVISIBLE
             holder.assessmentNumMarkedTextView.visibility = View.INVISIBLE
+        }else{
+            holder.assessmentTotalSubmissionsTextView.visibility = View.VISIBLE
+            holder.assessmentNumMarkedTextView.visibility = View.VISIBLE
         }
         holder.bind(item)
     }
