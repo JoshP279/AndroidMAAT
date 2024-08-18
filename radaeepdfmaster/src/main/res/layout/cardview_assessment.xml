@@ -11,6 +11,16 @@
         android:layout_width="401dp"
         android:layout_height="91dp">
 
+        <ImageView
+            android:id="@+id/assessment_overflow_menu"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="30dp"
+            android:src="@drawable/overflow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
         <TextView
             android:id="@+id/assessmentModuleCodeTextView"
             android:layout_width="wrap_content"

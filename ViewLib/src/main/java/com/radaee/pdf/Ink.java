@@ -6,6 +6,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.Paint.Cap;
 import android.graphics.Paint.Join;
+import android.util.Log;
 
 import com.radaee.comm.Global;
 

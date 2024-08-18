@@ -143,7 +143,7 @@
     <string name="fail_saved_message">Document not saved</string>
     <string name="pdf_fail_download">Failed to download PDF</string>
     <string name="pdf_fail_open">Failed to open PDF</string>
-    <string name="download_pdf">Downloading PDFs...</string>
+    <string name="download_pdf">Downloading Submission PDF...</string>
     <string name="pdf_fail_save">Failed to save PDF</string>
     <string name="pdf_saved_message">PDF saved as %1$s in %2$s</string>
     <string name="marking_style1">One mark per tick</string>
@@ -162,4 +162,8 @@
     <string name="invalid_username_or_password">Invalid username or password</string>
     <string name="offline_marking">Offline Marking</string>
     <string name="no_offline_submissions">No offline submissions found</string>
+    <string name="pdf_not_found">Submission PDF not found!</string>
+    <string name="download_all">Download all submissions</string>
+    <string name="downloading_submissions">Downloading all submissions and memo...</string>
+    <string name="download_memo_pdf">Downloading memo PDF...</string>
 </resources>

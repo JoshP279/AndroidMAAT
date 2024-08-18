@@ -139,6 +139,52 @@ object RetrofitClient {
     }
 
     /**
+     * This function is used to load assessments from the server.
+     * @param context The context of the activity or fragment that is calling the function (usually @ViewAssessmentsFragment).
+     * @param assessmentID The ID of the assessment that the submissions belong to.
+     * @param submissions The list of submissions that will be downloaded.
+     */
+    fun getSubmissions(context: Context, assessmentID: Int, submissions: MutableList<SubmissionsResponse>, callback: () -> Unit) {
+        api.getSubmissions(assessmentID)
+            .enqueue(object : Callback<List<SubmissionsResponse>> {
+                override fun onResponse(
+                    call: Call<List<SubmissionsResponse>>,
+                    response: Response<List<SubmissionsResponse>>
+                ) {
+                    if (response.isSuccessful) {
+                        val fetchedSubmissions = response.body()
+                        if (fetchedSubmissions != null) {
+                            submissions.clear()
+                            submissions.addAll(fetchedSubmissions)
+                            callback() // Notify that data is ready
+                        } else {
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.fail_load_submissions),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } else {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.fail_load_submissions),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<List<SubmissionsResponse>>, t: Throwable) {
+                    t.printStackTrace()
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.server_connect_fail),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+    }
+
+    /**
      * This function is used to load submissions from the server.
      * @param context The context of the activity or fragment that is calling the function (usually @SubmissionsActivity).
      * @param assessmentID The ID of the assessment that the submissions belong to.
@@ -234,29 +280,39 @@ object RetrofitClient {
      */
     private fun uploadSubmissionPDF(context: Context, assessmentID: Int, submissionID:Int, studentNumber: String) {
         val pdfFile = FileUtil.getSubmissionFile(assessmentID,studentNumber)
-        val progressDialog = ProgressDialog(context)
-        progressDialog.setMessage(context.getString(R.string.uploading_pdf))
-        progressDialog.setCancelable(false)
-        progressDialog.show()
-        val mediaType = MediaType.parse("application/pdf")
-        val requestFile = RequestBody.create(mediaType, pdfFile)
-        val body = MultipartBody.Part.createFormData("pdfFile", pdfFile.name, requestFile)
-        api.uploadSubmissionPDF(submissionID, assessmentID, body).enqueue(object : Callback<SingleResponse> {
-            override fun onResponse(call: Call<SingleResponse>, response: Response<SingleResponse>) {
-                progressDialog.dismiss()
-                if (response.isSuccessful) {
-                    Toast.makeText(context, R.string.upload_succes, Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, R.string.upload_fail, Toast.LENGTH_SHORT).show()
-                }
-            }
+        if (pdfFile?.exists() == true) {
+            val progressDialog = ProgressDialog(context)
+            progressDialog.setMessage(context.getString(R.string.uploading_pdf))
+            progressDialog.setCancelable(false)
+            progressDialog.show()
+            val mediaType = MediaType.parse("application/pdf")
+            val requestFile = RequestBody.create(mediaType, pdfFile)
+            val body = MultipartBody.Part.createFormData("pdfFile", pdfFile.name, requestFile)
+            api.uploadSubmissionPDF(submissionID, assessmentID, body)
+                .enqueue(object : Callback<SingleResponse> {
+                    override fun onResponse(
+                        call: Call<SingleResponse>,
+                        response: Response<SingleResponse>
+                    ) {
+                        progressDialog.dismiss()
+                        if (response.isSuccessful) {
+                            Toast.makeText(context, R.string.upload_succes, Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            Toast.makeText(context, R.string.upload_fail, Toast.LENGTH_SHORT).show()
+                        }
+                    }
 
-            override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
-                progressDialog.dismiss()
-                t.printStackTrace()
-                Toast.makeText(context, R.string.server_connect_fail, Toast.LENGTH_SHORT).show()
-            }
-        })
+                    override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
+                        progressDialog.dismiss()
+                        t.printStackTrace()
+                        Toast.makeText(context, R.string.server_connect_fail, Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                })
+        }else{
+            Toast.makeText(context, R.string.pdf_not_found, Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
@@ -321,7 +377,7 @@ object RetrofitClient {
      */
     fun downloadMemoPDF(context: Context,assessmentID: Int, folderName: String, callback: (String?) -> Unit) {
         val progressDialog = ProgressDialog(context)
-        progressDialog.setMessage(context.getString(R.string.download_pdf))
+        progressDialog.setMessage(context.getString(R.string.download_memo_pdf))
         progressDialog.setCancelable(false) //to ensure that the user cannot cancel the download
         progressDialog.show()
         api.getMemoPDF(assessmentID).enqueue(object : Callback<PDFResponse> {

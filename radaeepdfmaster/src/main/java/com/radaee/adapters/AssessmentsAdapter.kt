@@ -1,14 +1,24 @@
 package com.radaee.adapters
 
+import android.app.ProgressDialog
 import android.content.Context
+import android.os.Environment
 import android.view.LayoutInflater
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.dataclasses.AssessmentResponse
+import com.radaee.dataclasses.SubmissionsResponse
+import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
+import java.io.File
 
 /**
  * Adapter for the recycler view that displays the assessments
@@ -33,16 +43,102 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
         holder.assessmentNameTextView.text = item.assessmentName
         holder.assessmentTotalSubmissionsTextView.text = String.format(context.getString(R.string.submissions_marked), item.totalSubmissions)
         holder.assessmentNumMarkedTextView.text =  String.format(item.numMarked.toString() + "/")
+        holder.overflowMenu.setOnClickListener { showPopupMenu(holder.overflowMenu, position)}
+
         if (SharedPref.getBoolean(context, "OFFLINE_MODE", false)) {
             holder.assessmentTotalSubmissionsTextView.visibility = View.INVISIBLE
             holder.assessmentNumMarkedTextView.visibility = View.INVISIBLE
+            holder.overflowMenu.visibility = View.INVISIBLE
         }else{
             holder.assessmentTotalSubmissionsTextView.visibility = View.VISIBLE
             holder.assessmentNumMarkedTextView.visibility = View.VISIBLE
+            holder.overflowMenu.visibility = View.VISIBLE
         }
         holder.bind(item)
     }
-    override fun getItemCount() = mList.size
+
+    private fun showPopupMenu(view: View, position: Int) {
+        val popup = PopupMenu(context, view)
+        val inflater: MenuInflater = popup.menuInflater
+        inflater.inflate(R.menu.assessments_overflow_menu, popup.menu)
+        popup.setOnMenuItemClickListener(MyMenuItemClickListener(position))
+        popup.show()
+    }
+
+    /**
+     * This handles the click events for the pop up menu
+     * @param position position of the card view
+     */
+    inner class MyMenuItemClickListener(position: Int) : PopupMenu.OnMenuItemClickListener {
+        private val cur = mList[position]
+
+        override fun onMenuItemClick(item: MenuItem): Boolean {
+            return when (item.itemId) {
+                R.id.action_download_all -> {
+                    val submissions: MutableList<SubmissionsResponse> = mutableListOf()
+                    val progressDialog = ProgressDialog(context)
+                    progressDialog.setMessage(context.getString(R.string.downloading_submissions))
+                    progressDialog.setCancelable(false)
+                    progressDialog.show()
+
+                    RetrofitClient.getSubmissions(context, cur.assessmentID, submissions) {
+                        val folderName =
+                            cur.assessmentID.toString() + "_" + cur.moduleCode + "_" + cur.assessmentName
+                        var remainingDownloads = submissions.size + 1 // +1 for the memo
+                        RetrofitClient.downloadMemoPDF(context, cur.assessmentID, folderName) { path ->
+                            if (path == null) {
+                                Toast.makeText(
+                                    context,
+                                    R.string.pdf_fail_download,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                            remainingDownloads--
+
+                            if (remainingDownloads == 0) {
+                                progressDialog.dismiss()
+                            }
+                        }
+
+                        for (submission in submissions) {
+                            val submissionFileName =
+                                submission.submissionID.toString() + "_" + submission.submissionFolderName
+                            RetrofitClient.downloadSubmissionPDF(
+                                context,
+                                submission.submissionID,
+                                submissionFileName,
+                                folderName
+                            ) { path ->
+                                if (path == null) {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.pdf_fail_download,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                                remainingDownloads--
+
+                                // Dismiss the progress dialog when all downloads are done
+                                if (remainingDownloads == 0) {
+                                    progressDialog.dismiss()
+                                }
+                            }
+                        }
+
+                        // If there were no submissions, dismiss the dialog immediately
+                        if (remainingDownloads == 0) {
+                            progressDialog.dismiss()
+                        }
+                    }
+
+                    true
+                }
+
+                else -> false
+            }
+        }
+    }
+        override fun getItemCount() = mList.size
 
     /**
      * View holder for the recycler view
@@ -54,6 +150,7 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
         val assessmentNameTextView: TextView = itemView.findViewById(R.id.assessmentNameTextView)
         val assessmentNumMarkedTextView: TextView = itemView.findViewById(R.id.assessmentNumMarkedTextView)
         val assessmentTotalSubmissionsTextView: TextView = itemView.findViewById(R.id.assessmentsTotalScriptsTextView)
+        val overflowMenu: ImageView = itemView.findViewById(R.id.assessment_overflow_menu)
         fun bind(assessments: AssessmentResponse) {
             itemView.setOnClickListener {
                 listener?.onItemClick(adapterPosition)

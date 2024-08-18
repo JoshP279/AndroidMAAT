@@ -2,6 +2,7 @@ package com.radaee.objects
 
 import android.content.Context
 import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import com.radaee.pdfmaster.R
 import java.io.File
@@ -88,9 +89,18 @@ object FileUtil {
      * @param studentNumber the student number to get the file for
      * @return the submission file
      */
-    fun getSubmissionFile(assessmentID: Int, studentNumber: String): File {
+    fun getSubmissionFile(assessmentID: Int, studentNumber: String): File? {
         val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
-        val submissionFile = File(documentsDir, "Assessment_$assessmentID/submission_$studentNumber.pdf")
-        return submissionFile
+        val assessmentFolder = documentsDir.listFiles()?.find {
+            it.isDirectory && it.name.startsWith("${assessmentID}_")
+        }
+        if (assessmentFolder != null) {
+            val submissionFile = assessmentFolder.listFiles()?.find {
+                it.name.contains("s$studentNumber")
+            }
+            Log.e("FileUtil", "Submission file: $submissionFile")
+            return submissionFile
+        }
+        return null
     }
 }
