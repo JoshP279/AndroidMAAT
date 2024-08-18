@@ -99,7 +99,6 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
                                 progressDialog.dismiss()
                             }
                         }
-
                         for (submission in submissions) {
                             val submissionFileName =
                                 submission.submissionID.toString() + "_" + submission.submissionFolderName
@@ -117,15 +116,11 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
                                     ).show()
                                 }
                                 remainingDownloads--
-
-                                // Dismiss the progress dialog when all downloads are done
                                 if (remainingDownloads == 0) {
                                     progressDialog.dismiss()
                                 }
                             }
                         }
-
-                        // If there were no submissions, dismiss the dialog immediately
                         if (remainingDownloads == 0) {
                             progressDialog.dismiss()
                         }
