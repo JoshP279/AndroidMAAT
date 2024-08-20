@@ -276,6 +276,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             intent.putExtra("assessmentID", assessmentID)
             intent.putExtra("assessmentName", assessmentName)
             intent.putExtra("moduleCode", moduleCode)
+            intent.putExtra("submissionFolderName", filteredSubmissions[position].submissionFolderName)
             startActivity(intent)
         }else {
             Toast.makeText(applicationContext, R.string.pdf_fail_open, Toast.LENGTH_SHORT).show()

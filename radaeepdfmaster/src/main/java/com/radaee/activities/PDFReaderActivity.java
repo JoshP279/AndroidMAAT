@@ -87,6 +87,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private int assessmentID;
     private String assessmentName;
     private String moduleCode;
+    private String submissionFolderName;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,7 +117,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         saveButton.setOnClickListener(saveClickListener);
         bookmarkButton.setOnClickListener(bookmarkClickListener);
         commentButton.setOnClickListener(commentsClickListener);
-        Log.e("check", currentPos + " " );
         prevSubmissionButton.setVisibility(currentPos == 0 ? View.INVISIBLE : View.VISIBLE);
         nextSubmissionButton.setVisibility(currentPos == filteredSubmissions.size() - 1 ? View.INVISIBLE : View.VISIBLE);
         setupDivider();
@@ -129,6 +129,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             assessmentID = intent.getIntExtra("assessmentID", 1);
             assessmentName = intent.getStringExtra("assessmentName");
             moduleCode = intent.getStringExtra("moduleCode");
+            submissionFolderName = intent.getStringExtra("submissionFolderName");
         }
         if (submission != null && memo != null) {
             mPDFDoc = memo;
@@ -547,13 +548,13 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 BookmarkHandler.showBookmarks(this, sFilePath, pageno -> {sPDFView.PDFGotoPage(pageno);});
                 break;
             case R.id.action_setInProgress:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"In Progress");
+                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"In Progress", submissionFolderName);
                 break;
             case R.id.action_setMarked:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"Marked");
+                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"Marked", submissionFolderName);
                 break;
             case R.id.action_setUnmarked:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"Unmarked");
+                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"Unmarked", submissionFolderName);
             default:
                 break;
         }

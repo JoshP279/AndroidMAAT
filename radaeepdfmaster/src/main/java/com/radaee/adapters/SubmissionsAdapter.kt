@@ -94,9 +94,9 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
      * @param studentNumber student number
      * @param submissionStatus submission status to update (marked, unmarked, in progress)
      */
-    private fun updateSubmission(submissionID: Int, assessmentID:Int, studentNumber: String, submissionStatus: String) {
+    private fun updateSubmission(submissionID: Int, assessmentID:Int, studentNumber: String, submissionStatus: String, submissionFolderName: String) {
         if (context is SubmissionsActivity) {
-            RetrofitClient.updateSubmission(context,submissionID,assessmentID,studentNumber,submissionStatus)
+            RetrofitClient.updateSubmission(context,submissionID,assessmentID,studentNumber,submissionStatus, submissionFolderName)
             submissionUpdateListener?.onSubmissionUpdated()
         }
     }
@@ -109,15 +109,15 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
         override fun onMenuItemClick(item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.action_setMarked -> {
-                    updateSubmission(cur.submissionID, cur.assessmentID,cur.studentNumber,context.getString(R.string.marked))
+                    updateSubmission(cur.submissionID, cur.assessmentID,cur.studentNumber,context.getString(R.string.marked), cur.submissionFolderName)
                     true
                 }
                 R.id.action_setUnmarked-> {
-                    updateSubmission(cur.submissionID,cur.assessmentID,cur.studentNumber, context.getString(R.string.unmarked))
+                    updateSubmission(cur.submissionID,cur.assessmentID,cur.studentNumber, context.getString(R.string.unmarked), cur.submissionFolderName)
                     true
                 }
                 R.id.action_setInProgress-> {
-                    updateSubmission(cur.submissionID, cur.assessmentID,cur.studentNumber,context.getString(R.string.in_progress))
+                    updateSubmission(cur.submissionID, cur.assessmentID,cur.studentNumber,context.getString(R.string.in_progress), cur.submissionFolderName)
                     true
                 }
                 else -> false

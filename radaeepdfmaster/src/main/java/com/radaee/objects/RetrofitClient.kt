@@ -239,9 +239,9 @@ object RetrofitClient {
      * @param submissionStatus The new status of the submission.
      * If the submission status is "Marked", the submission PDF is uploaded to the server.
      */
-    fun updateSubmission(context: Context, submissionID: Int, assessmentID: Int,studentNumber: String,submissionStatus: String) {
+    fun updateSubmission(context: Context, submissionID: Int, assessmentID: Int,studentNumber: String,submissionStatus: String, submissionFolderName: String) {
         if (submissionStatus == context.getString(R.string.marked)) {
-            uploadSubmissionPDF(context,assessmentID,submissionID, studentNumber)
+            uploadSubmissionPDF(context,assessmentID,submissionID, submissionFolderName)
         }
         api.updateSubmission(UpdateSubmissionRequest(submissionID, submissionStatus))
             .enqueue(object : Callback<SingleResponse> {
@@ -278,8 +278,8 @@ object RetrofitClient {
      * @param submissionID The ID of the submission that will be updated.
      * @param studentNumber The student number of the student that submitted the submission.
      */
-    private fun uploadSubmissionPDF(context: Context, assessmentID: Int, submissionID:Int, studentNumber: String) {
-        val pdfFile = FileUtil.getSubmissionFile(assessmentID,studentNumber)
+    private fun uploadSubmissionPDF(context: Context, assessmentID: Int, submissionID:Int, submissionFolderName: String) {
+        val pdfFile = FileUtil.getSubmissionFile(assessmentID, submissionID, submissionFolderName)
         if (pdfFile?.exists() == true) {
             val progressDialog = ProgressDialog(context)
             progressDialog.setMessage(context.getString(R.string.uploading_pdf))

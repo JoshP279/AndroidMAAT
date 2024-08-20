@@ -66,8 +66,6 @@ object FileUtil {
      * @return true if the file exists, false otherwise
      */
     fun checkSubmissionExists(folderPath: File, fileName: String, studentNumber: String): Boolean {
-        Log.e("FileUtil", "Checking for file: $fileName")
-        Log.e("FileUtil", "Checking for folder: $folderPath")
         val file = File(folderPath, fileName)
         return file.exists()
     }
@@ -87,21 +85,26 @@ object FileUtil {
     /**
      * Get the submission file for the specified student number.
      * @param assessmentID the assessment ID to get the file for
-     * @param studentNumber the student number to get the file for
+     * @param submissionID the student number to get the file for
+     * @param submissionFolderName the submission folder name to get the file for
      * @return the submission file
      */
-    fun getSubmissionFile(assessmentID: Int, studentNumber: String): File? {
+    fun getSubmissionFile(assessmentID: Int, submissionID: Int, submissionFolderName: String): File? {
         val documentsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
         val assessmentFolder = documentsDir.listFiles()?.find {
             it.isDirectory && it.name.startsWith("${assessmentID}_")
         }
-        if (assessmentFolder != null) {
+
+        return if (assessmentFolder != null) {
+            // The file should be named as submissionID_submissionFolderName
+            val expectedFileName = "${submissionID}_$submissionFolderName"
             val submissionFile = assessmentFolder.listFiles()?.find {
-                it.name.contains("s$studentNumber")
+                it.name == expectedFileName
             }
-            Log.e("FileUtil", "Submission file: $submissionFile")
-            return submissionFile
+            submissionFile
+        } else {
+            null
         }
-        return null
     }
+
 }
