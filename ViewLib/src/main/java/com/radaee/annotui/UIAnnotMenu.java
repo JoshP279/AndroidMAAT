@@ -1,5 +1,6 @@
 package com.radaee.annotui;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -7,12 +8,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.radaee.pdf.Ink;
 import com.radaee.pdf.Page;
-import com.radaee.reader.PDFEditLayoutView;
 import com.radaee.viewlib.R;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 public class UIAnnotMenu {
     private final LinearLayout m_view;
@@ -22,6 +21,7 @@ public class UIAnnotMenu {
     private Boolean m_has_remove;
     private Boolean m_has_property;
     private static float ms_density = -1;
+    public static HashSet<Page.Annotation> annotHashSet = new HashSet<>();
 
     public interface IMemnuCallback {
         void onUpdate();
@@ -58,8 +58,12 @@ public class UIAnnotMenu {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Toast.makeText(m_view.getContext(), R.string.added_annot, Toast.LENGTH_SHORT).show();
+                annotHashSet.add(m_annot);
+                if (annotHashSet != null){
+                    int size = annotHashSet.size();
+                    Log.e("check", size + " ");
+                    Toast.makeText(m_view.getContext(), annotHashSet.isEmpty() + "", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 //        btn = m_view.findViewById(R.id.btn_annot_edit);

@@ -347,19 +347,19 @@ object RetrofitClient {
                             documentsDir.mkdirs()
                         }
                         val path = FileUtil.saveSubmissionPDF(context,byteArray, submissionFolderName, documentsDir)
-                        callback(path) //if path is not null, the callback is called with the path
+                        callback(path)
                     } else {
-                        callback(null) //if the response is null, the callback is called with null
+                        callback(null)
                     }
                 } else {
-                    callback(null) //if the response is not successful, the callback is called with null
+                    callback(null)
                 }
             }
 
             override fun onFailure(call: Call<PDFResponse>, t: Throwable) {
                 progressDialog.dismiss()
                 t.printStackTrace()
-                callback(null) //if the request fails, the callback is called with null
+                callback(null)
             }
         })
     }

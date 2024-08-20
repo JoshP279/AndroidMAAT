@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.radaee.annotui.UIAnnotMenu;
 import com.radaee.comm.Global;
 import com.radaee.dataclasses.SubmissionsResponse;
 import com.radaee.objects.FileUtil;
@@ -32,6 +34,7 @@ import com.radaee.util.CommonUtil;
 import com.radaee.view.IPDFLayoutView;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -112,7 +115,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         redoButton.setOnClickListener(redoClickListener);
         saveButton.setOnClickListener(saveClickListener);
         bookmarkButton.setOnClickListener(bookmarkClickListener);
-        commentButton.setOnClickListener(textClickListener);
+        commentButton.setOnClickListener(commentsClickListener);
         Log.e("check", currentPos + " " );
         prevSubmissionButton.setVisibility(currentPos == 0 ? View.INVISIBLE : View.VISIBLE);
         nextSubmissionButton.setVisibility(currentPos == filteredSubmissions.size() - 1 ? View.INVISIBLE : View.VISIBLE);
@@ -367,28 +370,27 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             texted = !texted;
         }
     };
-//Does not work currently
-//    private final View.OnClickListener commentsClickListener = v -> {
-//        if (!PDFEditView.inkHashMap.isEmpty()) {
-//            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-//            builder.setTitle("Comments");
-//            ArrayList<String> commentsStringList = new ArrayList<>();
-//            for (Ink comment :PDFEditView.inkHashMap.values()) {
-//                commentsStringList.add(comment.toString());
-//            }
-//            ArrayAdapter<String> adapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_list_item_1, commentsStringList);
-//            builder.setAdapter(adapter, (dialog, which) -> {
-//                Ink selectedComment = PDFEditView.inkHashMap.get(which);
-//                sPDFView.PDFSetAnnot(selectedComment, m_cur_page);
-//                Toast.makeText(v.getContext(), "Selected: " + selectedComment.getClass().getSimpleName(), Toast.LENGTH_SHORT).show();
-//            });
-//            builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-//            AlertDialog alertDialog = builder.create();
-//            alertDialog.show();
-//        } else {
-//            Toast.makeText(v.getContext(), "No comments available", Toast.LENGTH_SHORT).show();
-//        }
-//    };
+    private final View.OnClickListener commentsClickListener = v -> {
+        if (!UIAnnotMenu.annotHashSet.isEmpty()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+            builder.setTitle("Comments");
+            ArrayList<String> commentsStringList = new ArrayList<>();
+            for (Page.Annotation annot :UIAnnotMenu.annotHashSet) {
+                commentsStringList.add(annot.toString());
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_list_item_1, commentsStringList);
+            builder.setAdapter(adapter, (dialog, which) -> {
+                List<Page.Annotation> annotList = new ArrayList<>(UIAnnotMenu.annotHashSet);
+                Page.Annotation selectedAnnot = annotList.get(which);
+//                sPDFView.PDFSetAnnot(selectedAnnot, m_cur_page);
+            });
+            builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        } else {
+            Toast.makeText(v.getContext(), "No comments available", Toast.LENGTH_SHORT).show();
+        }
+    };
     /**
      * All the below methods are overridden from the IPDFLayoutView.PDFLayoutListener interface.
      * Many are not used in this activity, but are overridden to avoid compilation errors.

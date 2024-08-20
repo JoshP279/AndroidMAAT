@@ -53,6 +53,7 @@ import com.radaee.viewlib.R;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -3270,7 +3271,6 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
     private UIAnnotMenu m_aMenu = null;
     private UIEditMenu m_eMenu = null;
     private PDFSel m_sel = null;
-    public static HashMap<Integer,Ink> inkHashMap = new HashMap<>();
     static int numInk = 0;
 
     public void PDFSetInk(int code) {
@@ -3295,7 +3295,6 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                     requestRender();
                     page.Close();
                     m_ink.ID = numInk;
-                    inkHashMap.put(numInk,m_ink);
                     numInk++;
                     if (m_listener != null)
                         m_listener.OnPDFPageModified(m_annot_page.GetPageNo());
@@ -3325,7 +3324,7 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                 mat.TransformInk(m_ink);
                 page.AddAnnotInk(m_ink);
                 mat.Destroy();
-//                m_opstack.push(new OPAdd(m_annot_page.GetPageNo(), page, page.GetAnnotCount() - 1));
+                m_opstack.push(new OPAdd(m_annot_page.GetPageNo(), page, page.GetAnnotCount() - 1));
                 m_layout.gl_render(m_annot_page);
                 requestRender();
                 page.Close();

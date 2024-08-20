@@ -27,7 +27,6 @@ object FileUtil {
             val fos = FileOutputStream(file)
             fos.write(pdfData)
             fos.close()
-            Toast.makeText(context, context.getString(R.string.pdf_saved_message, submissionFolderName, documentsDir), Toast.LENGTH_SHORT).show()
             file.absolutePath
         } catch (e: IOException) {
             e.printStackTrace()

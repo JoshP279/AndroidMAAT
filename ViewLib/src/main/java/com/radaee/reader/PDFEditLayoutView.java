@@ -57,7 +57,7 @@ public class PDFEditLayoutView extends RelativeLayout implements IPDFLayoutView 
     public void PDFSetInk(int code) {
         m_view.PDFSetInk(code);
     }
-    //below code is Josh
+
     public void PDFSetAnnot(Ink ink, int page){
         m_view.PDFSetAnnot(ink, page);
     }
