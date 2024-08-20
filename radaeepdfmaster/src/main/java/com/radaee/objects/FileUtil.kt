@@ -66,6 +66,8 @@ object FileUtil {
      * @return true if the file exists, false otherwise
      */
     fun checkSubmissionExists(folderPath: File, fileName: String, studentNumber: String): Boolean {
+        Log.e("FileUtil", "Checking for file: $fileName")
+        Log.e("FileUtil", "Checking for folder: $folderPath")
         val file = File(folderPath, fileName)
         return file.exists()
     }
