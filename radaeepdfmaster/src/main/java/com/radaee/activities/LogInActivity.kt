@@ -13,11 +13,13 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.radaee.objects.RegexUtils
 import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
@@ -31,8 +33,8 @@ import com.radaee.pdfmaster.R
 class LogInActivity : AppCompatActivity() {
     private lateinit var loginBtn: Button
     private lateinit var offlineBtn: Button
-    private lateinit var emailTextview: TextView
-    private lateinit var passwordTextView: TextView
+    private lateinit var emailEditText: EditText
+    private lateinit var passwordEditText: EditText
     private lateinit var headingTextView: TextView
     private lateinit var loginHelper: TextView
 
@@ -47,8 +49,8 @@ class LogInActivity : AppCompatActivity() {
         SharedPref.saveBoolean(this,"DARK_MODE",(resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
         loginBtn = findViewById(R.id.loginBtn)
         offlineBtn = findViewById(R.id.btnOffline)
-        emailTextview = findViewById(R.id.loginEmail)
-        passwordTextView = findViewById(R.id.loginPassword)
+        emailEditText = findViewById(R.id.loginEmail)
+        passwordEditText = findViewById(R.id.loginPassword)
         headingTextView = findViewById(R.id.headingTxtView)
         loginHelper = findViewById(R.id.loginHelper)
         loginHelper.setOnClickListener {
@@ -65,8 +67,13 @@ class LogInActivity : AppCompatActivity() {
             startActivity(intent)
         }
         loginBtn.setOnClickListener {
-            val email = emailTextview.text.toString()
-            val password = passwordTextView.text.toString()
+            val email = emailEditText.text.toString()
+            val password = passwordEditText.text.toString()
+            if (checkEmptyInput()) return@setOnClickListener
+            if (!RegexUtils.isValidEmail(email)) {
+                emailEditText.error =  getString(R.string.email_invalid)
+                return@setOnClickListener
+            }
             RetrofitClient.attemptLogin(this, email, password)
         }
         checkSavedLogin()
@@ -91,11 +98,9 @@ class LogInActivity : AppCompatActivity() {
         val savedEmail = SharedPref.getString(this@LogInActivity,"email", null)
         val savedPassword = SharedPref.getString(this@LogInActivity,"password", null)
         if (!savedEmail.isNullOrEmpty() && !savedPassword.isNullOrEmpty()) {
-            emailTextview.text = savedEmail
-            passwordTextView.text = savedPassword
-
+            emailEditText.setText(savedEmail)
+            passwordEditText.setText(savedPassword)
             if (checkEmptyInput()) { return }
-
         }
     }
     /**
@@ -103,8 +108,8 @@ class LogInActivity : AppCompatActivity() {
      * @return true if any of the fields are empty, false otherwise
      */
     private fun checkEmptyInput(): Boolean {
-        val emptyEmail = emailTextview.text.toString().isEmpty()
-        val emptyPassword = passwordTextView.text.toString().isEmpty()
+        val emptyEmail = emailEditText.text.toString().isEmpty()
+        val emptyPassword = passwordEditText.text.toString().isEmpty()
         return when {
             emptyEmail && emptyPassword -> {
                 Toast.makeText(this, R.string.enter_email_address_and_password, Toast.LENGTH_SHORT).show()

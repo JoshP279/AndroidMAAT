@@ -166,4 +166,5 @@
     <string name="download_all">Download all submissions</string>
     <string name="downloading_submissions">Downloading all submissions and memo...</string>
     <string name="download_memo_pdf">Downloading memo PDF...</string>
+    <string name="email_invalid">Invalid email address</string>
 </resources>
