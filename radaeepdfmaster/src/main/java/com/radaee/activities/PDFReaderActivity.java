@@ -400,6 +400,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                     .setTitle("Annotations")
                     .setItems(annotationsArray, (dialog, which) -> {
                         UIAnnotMenu.IMemnuCallback selectedCallback = callbackList.get(which);
+                        selectedCallback.onAddCommonAnnotation(m_cur_page);
                         Toast.makeText(v.getContext(), "Selected: " + selectedCallback.toString(), Toast.LENGTH_SHORT).show();
                     })
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())

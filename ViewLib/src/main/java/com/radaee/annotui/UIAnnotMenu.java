@@ -35,7 +35,7 @@ public class UIAnnotMenu {
 
         void onCancel();
 
-        void onAddCommonAnnot(int pageNum);
+        void onAddCommonAnnotation(int pageNo);
 
     }
     // Generate a unique identifier for the annotation, e.g., based on page number and coordinates

@@ -1161,6 +1161,11 @@ public class PDFLayoutView extends View implements IPDFLayoutView, LayoutListene
                     @Override
                     public void onCancel() {
                     }
+
+                    @Override
+                    public void onAddCommonAnnotation(int pageNo) {
+
+                    }
                 });
             }
             else
@@ -1182,6 +1187,11 @@ public class PDFLayoutView extends View implements IPDFLayoutView, LayoutListene
                     }
                     @Override
                     public void onCancel() {
+                    }
+
+                    @Override
+                    public void onAddCommonAnnotation(int pageNo) {
+
                     }
                 });
             }

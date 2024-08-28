@@ -1108,6 +1108,11 @@ public class PDFGLView extends GLSurfaceView implements PDFGLCanvas.CanvasListen
                             public void onCancel() {
                                 PDFCancelAnnot();
                             }
+
+                            @Override
+                            public void onAddCommonAnnotation(int pageNo) {
+
+                            }
                         });
                     }
                 }
@@ -1265,7 +1270,11 @@ public class PDFGLView extends GLSurfaceView implements PDFGLCanvas.CanvasListen
                     }
 
                     @Override
-                    public void onCancel() {
+                    public void onCancel() {}
+
+                    @Override
+                    public void onAddCommonAnnotation(int pageNo) {
+
                     }
                 });
             } else {
@@ -1291,6 +1300,12 @@ public class PDFGLView extends GLSurfaceView implements PDFGLCanvas.CanvasListen
                     @Override
                     public void onCancel() {
                     }
+
+                    @Override
+                    public void onAddCommonAnnotation(int pageNo) {
+
+                    }
+
                 });
             }
         }

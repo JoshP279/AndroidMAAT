@@ -52,8 +52,6 @@ import com.radaee.view.PDFSel;
 import com.radaee.viewlib.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -1162,10 +1160,13 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                                 PDFCancelAnnot();
                             }
 
-                            public boolean isAdded() {return isAdded;}
-
-                            public void setAdded(boolean added) {
-                                isAdded = added;
+                            @Override
+                            public void onAddCommonAnnotation(int pageNo) {
+                                m_layout.gl_render(m_annot_page);
+                                requestRender();
+                                if (m_listener != null && m_annot_page != null)
+                                    m_listener.OnPDFPageModified(pageNo);
+                                PDFEndAnnot();
                             }
                         });
                     }
@@ -1321,6 +1322,10 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                     public void onCancel() {
                     }
 
+                    @Override
+                    public void onAddCommonAnnotation(int pageNo) {}
+
+
                 });
             } else {
                 UIAnnotDlgSign dlg = new UIAnnotDlgSign(getContext());
@@ -1345,6 +1350,12 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                     @Override
                     public void onCancel() {
                     }
+
+                    @Override
+                    public void onAddCommonAnnotation(int pageNo) {
+
+                    }
+
                 });
             }
         }
