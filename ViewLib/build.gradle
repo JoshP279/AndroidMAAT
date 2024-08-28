@@ -5,7 +5,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 24
         compileSdk 34
         renderscriptTargetApi 18
         renderscriptSupportModeEnabled true
