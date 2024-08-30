@@ -8,8 +8,8 @@
     android:foreground="@drawable/border">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="401dp"
-        android:layout_height="91dp">
+        android:layout_width="match_parent"
+        android:layout_height="95dp">
 
         <ImageView
             android:id="@+id/assessment_overflow_menu"
