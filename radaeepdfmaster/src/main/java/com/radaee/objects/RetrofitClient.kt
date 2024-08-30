@@ -43,8 +43,8 @@ object RetrofitClient {
      * YOU MUST CHANGE THE IP ADDRESS TO THE IP ADDRESS THAT THE SERVER AND THE DEVICE IS CONNECTED TO IN ORDER TO WORK
      * DO NOT CHANGE PORT NUMBER, ONLY THE IP ADDRESS
      */
-    private const val BASE_URL = "http://10.0.0.110:3306/"
-    val api: API by lazy {
+    private const val BASE_URL = "http://10.112.49.6:3306/"
+    val api: API by lazy {//
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())

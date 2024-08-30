@@ -35,7 +35,10 @@ import com.radaee.view.IPDFLayoutView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * PDFReaderActivity displays both the submission and the memo side by side.
@@ -356,7 +359,8 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     };
 
     /**
-     * commentClickListener is the OnClickListener for the commentButton.
+     * textClickListener is the OnClickListener for the textButton.
+     * Allows a user to input typed annotations, rather than stylus input
      */
     private final View.OnClickListener textClickListener = new View.OnClickListener() {
         @Override
@@ -371,27 +375,48 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             texted = !texted;
         }
     };
+    /**
+     * commentsClickListener is the OnClickListener for the commentsButton
+     * Allows a user to reuse common annotations across assessments
+     */
     private final View.OnClickListener commentsClickListener = v -> {
         if (!UIAnnotMenu.annotHashSet.isEmpty()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-            builder.setTitle("Comments");
-            ArrayList<String> commentsStringList = new ArrayList<>();
-            for (Page.Annotation annot :UIAnnotMenu.annotHashSet) {
-                commentsStringList.add(annot.toString());
+            // Create a list to hold the annotations as strings
+            List<String> annotationsList = new ArrayList<>();
+            List<UIAnnotMenu.IMemnuCallback> callbackList = new ArrayList<>(UIAnnotMenu.annotHashSet);
+
+            // Iterate over the HashSet and format the annotations
+            for (UIAnnotMenu.IMemnuCallback callback : callbackList) {
+                // Assuming each callback has a unique identifier or description
+                String annotationInfo = callback.toString(); // Replace with appropriate method to get annotation details
+                annotationsList.add(annotationInfo);
             }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(v.getContext(), android.R.layout.simple_list_item_1, commentsStringList);
-            builder.setAdapter(adapter, (dialog, which) -> {
-                List<Page.Annotation> annotList = new ArrayList<>(UIAnnotMenu.annotHashSet);
-                Page.Annotation selectedAnnot = annotList.get(which);
-//                sPDFView.PDFSetAnnot(selectedAnnot, m_cur_page);
-            });
-            builder.setPositiveButton("OK", (dialog, which) -> dialog.dismiss());
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
+
+            // Convert the list to an array
+            String[] annotationsArray = annotationsList.toArray(new String[0]);
+
+            // Build and display the AlertDialog
+            new AlertDialog.Builder(v.getContext())
+                    .setTitle("Annotations")
+                    .setItems(annotationsArray, (dialog, which) -> {
+                        UIAnnotMenu.IMemnuCallback selectedCallback = callbackList.get(which);
+                        selectedCallback.onAddCommonAnnotation(m_cur_page);
+                        Toast.makeText(v.getContext(), "Selected: " + selectedCallback.toString(), Toast.LENGTH_SHORT).show();
+                    })
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .show();
         } else {
-            Toast.makeText(v.getContext(), "No comments available", Toast.LENGTH_SHORT).show();
+            // Show a message if the HashSet is empty
+            new AlertDialog.Builder(v.getContext())
+                    .setTitle("Annotations")
+                    .setMessage("No annotations found.")
+                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                    .show();
         }
     };
+
+
+
     /**
      * All the below methods are overridden from the IPDFLayoutView.PDFLayoutListener interface.
      * Many are not used in this activity, but are overridden to avoid compilation errors.

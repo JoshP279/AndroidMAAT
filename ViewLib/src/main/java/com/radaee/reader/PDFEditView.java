@@ -52,8 +52,6 @@ import com.radaee.view.PDFSel;
 import com.radaee.viewlib.R;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -1136,6 +1134,7 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                     m_listener.OnPDFAnnotTapped(m_annot_pos.pageno, m_annot);
                     if (PDFCanSave() && m_aMenu != null) {
                         m_aMenu.show(m_annot, m_annot_rect, new UIAnnotMenu.IMemnuCallback() {
+                            private boolean isAdded = false;
                             //the update need new operator in OPStack
                             @Override
                             public void onUpdate() {
@@ -1159,6 +1158,15 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                             @Override
                             public void onCancel() {
                                 PDFCancelAnnot();
+                            }
+
+                            @Override
+                            public void onAddCommonAnnotation(int pageNo) {
+                                m_layout.gl_render(m_annot_page);
+                                requestRender();
+                                if (m_listener != null && m_annot_page != null)
+                                    m_listener.OnPDFPageModified(pageNo);
+                                PDFEndAnnot();
                             }
                         });
                     }
@@ -1313,6 +1321,11 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                     @Override
                     public void onCancel() {
                     }
+
+                    @Override
+                    public void onAddCommonAnnotation(int pageNo) {}
+
+
                 });
             } else {
                 UIAnnotDlgSign dlg = new UIAnnotDlgSign(getContext());
@@ -1337,6 +1350,12 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                     @Override
                     public void onCancel() {
                     }
+
+                    @Override
+                    public void onAddCommonAnnotation(int pageNo) {
+
+                    }
+
                 });
             }
         }
@@ -1386,7 +1405,6 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
 
             @Override
             public void onSurfaceChanged(GL10 gl10, int width, int height) {
-                Log.e("GLView", "onSurfaceChanged");
                 m_w = width;
                 m_h = height;
                 gl10.glViewport(0, 0, m_w, m_h);

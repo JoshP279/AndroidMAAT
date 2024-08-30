@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.radaee.pdf.Page;
 import com.radaee.viewlib.R;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class UIAnnotMenu {
@@ -21,7 +22,9 @@ public class UIAnnotMenu {
     private Boolean m_has_remove;
     private Boolean m_has_property;
     private static float ms_density = -1;
-    public static HashSet<Page.Annotation> annotHashSet = new HashSet<>();
+    public static HashSet<IMemnuCallback> annotHashSet = new HashSet<>();
+    public static HashMap<String, Boolean> annotationStateMap = new HashMap<>();
+
 
     public interface IMemnuCallback {
         void onUpdate();
@@ -31,8 +34,18 @@ public class UIAnnotMenu {
         void onPerform();
 
         void onCancel();
-    }
 
+        void onAddCommonAnnotation(int pageNo);
+
+    }
+    // Generate a unique identifier for the annotation, e.g., based on page number and coordinates
+    private String generateAnnotationId(Page.Annotation annot) {
+        int pageNum = annot.GetIndexInPage();
+        int type = annot.GetType();
+        float[] bbox = new float[4];
+        annot.GetRect();
+        return pageNum + "_" + type + "_" + bbox[0] + "_" + bbox[1] + "_" + bbox[2] + "_" + bbox[3];
+    }
     private IMemnuCallback m_callback;
 
     private int Dp2Px(float dp) {
@@ -58,12 +71,14 @@ public class UIAnnotMenu {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                annotHashSet.add(m_annot);
-                if (annotHashSet != null){
-                    int size = annotHashSet.size();
-                    Log.e("check", size + " ");
-                    Toast.makeText(m_view.getContext(), annotHashSet.isEmpty() + "", Toast.LENGTH_SHORT).show();
+                String annotationId = generateAnnotationId(m_annot);
+                boolean isAdded = Boolean.TRUE.equals(annotationStateMap.getOrDefault(annotationId, false));
+                if (!isAdded) {
+                    annotationStateMap.put(annotationId, true);
+                    annotHashSet.add(m_callback);
                 }
+                int size = annotHashSet.size();
+                Toast.makeText(m_view.getContext(), size + "", Toast.LENGTH_SHORT).show();
             }
         });
 //        btn = m_view.findViewById(R.id.btn_annot_edit);
@@ -114,11 +129,16 @@ public class UIAnnotMenu {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (m_callback != null)
+                if (m_callback != null) {
+                    String annotationId = generateAnnotationId(m_annot); // Generate unique identifier
+                    annotHashSet.remove(m_callback);
+                    annotationStateMap.put(annotationId, false);
                     m_callback.onRemove();
+                }
                 hide();
             }
         });
+
 //        btn = m_view.findViewById(R.id.btn_annot_perform);
 //        btn.setOnClickListener(new View.OnClickListener() {
 //            @Override
