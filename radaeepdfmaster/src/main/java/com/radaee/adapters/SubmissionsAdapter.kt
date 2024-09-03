@@ -24,7 +24,7 @@ import com.radaee.pdfmaster.R
  * @param context context of the activity, which is @SubmissionsActivity
  * This adapter just binds the necessary data to the submissions card view
  */
-class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private val context: Context) : RecyclerView.Adapter<SubmissionsAdapter.ViewHolder>()  {
+class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private val context: Context, private val totalMarks: Int, private val markingStyle: String) : RecyclerView.Adapter<SubmissionsAdapter.ViewHolder>()  {
     private var listener: OnItemClickListener? = null
     private var submissionUpdateListener: SubmissionUpdateListener? = null
     override fun onCreateViewHolder(
@@ -96,7 +96,7 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
      */
     private fun updateSubmission(submissionID: Int, assessmentID:Int, studentNumber: String, submissionStatus: String, submissionFolderName: String) {
         if (context is SubmissionsActivity) {
-            RetrofitClient.updateSubmission(context,submissionID,assessmentID,studentNumber,submissionStatus, submissionFolderName)
+            RetrofitClient.updateSubmission(context,submissionID,assessmentID,totalMarks,submissionStatus, submissionFolderName, markingStyle)
             submissionUpdateListener?.onSubmissionUpdated()
         }
     }

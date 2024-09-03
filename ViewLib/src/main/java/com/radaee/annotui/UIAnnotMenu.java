@@ -72,7 +72,10 @@ public class UIAnnotMenu {
             @Override
             public void onClick(View v) {
                 String annotationId = generateAnnotationId(m_annot);
-                boolean isAdded = Boolean.TRUE.equals(annotationStateMap.getOrDefault(annotationId, false));
+                boolean isAdded = false;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                    isAdded = Boolean.TRUE.equals(annotationStateMap.getOrDefault(annotationId, false));
+                }
                 if (!isAdded) {
                     annotationStateMap.put(annotationId, true);
                     annotHashSet.add(m_callback);
@@ -131,8 +134,8 @@ public class UIAnnotMenu {
             public void onClick(View v) {
                 if (m_callback != null) {
                     String annotationId = generateAnnotationId(m_annot); // Generate unique identifier
-                    annotHashSet.remove(m_callback);
-                    annotationStateMap.put(annotationId, false);
+//                    annotHashSet.remove(m_callback);
+//                    annotationStateMap.put(annotationId, false);
                     m_callback.onRemove();
                 }
                 hide();

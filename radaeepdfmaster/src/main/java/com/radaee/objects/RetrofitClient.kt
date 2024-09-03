@@ -4,7 +4,6 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
-import android.util.Log
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.activities.LogInActivity
@@ -16,6 +15,7 @@ import com.radaee.dataclasses.LogInResponse
 import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SingleResponse
 import com.radaee.dataclasses.SubmissionsResponse
+import com.radaee.dataclasses.UpdateMarkingStyleRequest
 import com.radaee.dataclasses.UpdateSubmissionRequest
 import com.radaee.pdfmaster.R
 import okhttp3.MediaType
@@ -43,7 +43,7 @@ object RetrofitClient {
      * YOU MUST CHANGE THE IP ADDRESS TO THE IP ADDRESS THAT THE SERVER AND THE DEVICE IS CONNECTED TO IN ORDER TO WORK
      * DO NOT CHANGE PORT NUMBER, ONLY THE IP ADDRESS
      */
-    private const val BASE_URL = "http://10.112.49.6:3306/"
+    private const val BASE_URL = "http://10.0.0.107:3306/"
     val api: API by lazy {//
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -71,6 +71,8 @@ object RetrofitClient {
                     if (resp?.MarkerRole.equals("Lecturer") || resp?.MarkerRole.equals("Demi")) {
                         SharedPref.saveString(context,"email", email)
                         SharedPref.saveString(context,"password", password)
+                        if (resp?.MarkingStyle != null) SharedPref.saveString(context, "marking_style", resp.MarkingStyle)
+                        else SharedPref.saveString(context, "marking_style", context.getString(R.string.marking_style1)) //default marking style, most people are right handed
                         val intent = Intent(context, MainActivity::class.java)
                         SharedPref.saveBoolean(context,"OFFLINE_MODE",false)
                         context.startActivity(intent)
@@ -239,10 +241,7 @@ object RetrofitClient {
      * @param submissionStatus The new status of the submission.
      * If the submission status is "Marked", the submission PDF is uploaded to the server.
      */
-    fun updateSubmission(context: Context, submissionID: Int, assessmentID: Int,studentNumber: String,submissionStatus: String, submissionFolderName: String) {
-        if (submissionStatus == context.getString(R.string.marked)) {
-            uploadSubmissionPDF(context,assessmentID,submissionID, submissionFolderName)
-        }
+    fun updateSubmission(context: Context, submissionID: Int, assessmentID: Int, totalMarks:Int,submissionStatus: String, submissionFolderName: String, markingStyle: String) {
         api.updateSubmission(UpdateSubmissionRequest(submissionID, submissionStatus))
             .enqueue(object : Callback<SingleResponse> {
                 override fun onResponse(call: Call<SingleResponse>, response: Response<SingleResponse>) {
@@ -252,6 +251,9 @@ object RetrofitClient {
                             context.getString(R.string.submission_status_success),
                             Toast.LENGTH_SHORT
                         ).show()
+                        if (submissionStatus == context.getString(R.string.marked)) {
+                            uploadSubmissionPDF(context,assessmentID,submissionID, totalMarks, submissionFolderName, markingStyle)
+                        }
                     } else {
                         Toast.makeText(
                             context,
@@ -278,7 +280,7 @@ object RetrofitClient {
      * @param submissionID The ID of the submission that will be updated.
      * @param studentNumber The student number of the student that submitted the submission.
      */
-    private fun uploadSubmissionPDF(context: Context, assessmentID: Int, submissionID:Int, submissionFolderName: String) {
+    private fun uploadSubmissionPDF(context: Context, assessmentID: Int, submissionID:Int, totalMarks: Int, submissionFolderName: String, markingStyle: String) {
         val pdfFile = FileUtil.getSubmissionFile(assessmentID, submissionID, submissionFolderName)
         if (pdfFile?.exists() == true) {
             val progressDialog = ProgressDialog(context)
@@ -288,7 +290,7 @@ object RetrofitClient {
             val mediaType = MediaType.parse("application/pdf")
             val requestFile = RequestBody.create(mediaType, pdfFile)
             val body = MultipartBody.Part.createFormData("pdfFile", pdfFile.name, requestFile)
-            api.uploadSubmissionPDF(submissionID, assessmentID, body)
+            api.uploadSubmissionPDF(submissionID, totalMarks, markingStyle, body)
                 .enqueue(object : Callback<SingleResponse> {
                     override fun onResponse(
                         call: Call<SingleResponse>,
@@ -404,6 +406,22 @@ object RetrofitClient {
                 progressDialog.dismiss()
                 t.printStackTrace()
                 callback(null) //if the request fails, the callback is called with null
+            }
+        })
+    }
+
+    fun updateMarkingStyle(context: Context, markerEmail: String, markingStyle: String) {
+        api.updateMarkingStyle(UpdateMarkingStyleRequest(markingStyle,markerEmail)).enqueue(object : Callback<SingleResponse> {
+            override fun onResponse(call: Call<SingleResponse>, response: Response<SingleResponse>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(context, R.string.marking_style_updated, Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, R.string.marking_style_update_fail, Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
+                t.printStackTrace()
+                Toast.makeText(context, R.string.server_connect_fail, Toast.LENGTH_SHORT).show()
             }
         })
     }

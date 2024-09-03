@@ -1,5 +1,7 @@
 package com.radaee.comm;
 
+import android.util.Log;
+
 import com.radaee.pdf.Ink;
 import com.radaee.pdf.Path;
 
@@ -90,6 +92,7 @@ public class Matrix {
 
     public final void TransformInk(Ink ink) {
         if (ink == null) return;
+        Log.e("PDFSetAnnot", ink.get_hand() + "");
         transformInk(hand, ink.get_hand());
     }
 

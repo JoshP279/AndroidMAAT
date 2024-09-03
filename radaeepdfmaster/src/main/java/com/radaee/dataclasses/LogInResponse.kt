@@ -6,5 +6,6 @@ package com.radaee.dataclasses
  * If a role is returned, the user has successfully logged in
  */
 data class LogInResponse(
-    val MarkerRole: String
+    val MarkerRole: String,
+    val MarkingStyle: String
 )

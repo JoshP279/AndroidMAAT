@@ -3274,6 +3274,7 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
     private float m_annot_x0;
     private float m_annot_y0;
     private Ink m_ink = null;
+    public Ink lastInk = null;
     private Path m_polygon;
     private Bitmap m_icon = null;
     private Document.DocImage m_dicon = null;
@@ -3296,6 +3297,7 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
         {
             m_status = STA_INK;
             m_ink = new Ink(Global.g_ink_width, Global.g_ink_color);
+            lastInk = m_ink.clone();
         } else if (code == 1)//end
         {
             m_status = STA_NONE;
@@ -3332,31 +3334,73 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
         }
     }
     public void PDFSetAnnot(Ink ink, int pagenum) {
-        m_ink = ink;
+        m_ink = (ink != null) ? ink : lastInk.clone();
+        m_status = STA_NONE;
+
+        Log.d("PDFSetAnnot", "Method called with pagenum: " + pagenum);
         m_annot_page = m_layout.vGetPage(pagenum);
+
         if (m_annot_page != null) {
-            Page page = m_doc.GetPage(reuse_pos);
+            Log.d("PDFSetAnnot", "m_annot_page: " + m_annot_page.GetPageNo());
+            Page page = m_doc.GetPage(m_annot_page.GetPageNo());
+
             if (page != null) {
+                Log.d("PDFSetAnnot", "Successfully retrieved page with number: " + pagenum);
                 page.ObjsStart();
                 Matrix mat = m_annot_page.CreateInvertMatrix(m_layout.vGetX(), m_layout.vGetY());
-                mat.TransformInk(m_ink);
-                page.AddAnnotInk(m_ink);
-                mat.Destroy();
-                m_opstack.push(new OPAdd(m_annot_page.GetPageNo(), page, page.GetAnnotCount() - 1));
-                m_layout.gl_render(m_annot_page);
-                requestRender();
-                page.Close();
-                Toast.makeText(getContext(), "added annot on page " + m_annot_page.GetPageNo(), Toast.LENGTH_SHORT).show();
-                if (m_listener != null)
-                    m_listener.OnPDFPageModified(m_annot_page.GetPageNo());
+                Log.d("PDFSetAnnot", "Matrix created for ink transformation");
+
+                // Additional debugging information for transformation
+                if (mat != null && m_ink != null) {
+                    mat.TransformInk(m_ink);
+                    Log.d("PDFSetAnnot", "Ink transformed using matrix");
+
+                    page.AddAnnotInk(m_ink);
+                    Log.d("PDFSetAnnot", "Annotation ink added to page");
+
+                    mat.Destroy();
+                    Log.d("PDFSetAnnot", "Matrix destroyed");
+
+                    Log.d("PDFSetAnnot", "Rendering page with new annotation...");
+                    m_layout.gl_render(m_annot_page);  // Ensure this function updates the visible content
+                    requestRender();
+                    Log.d("PDFSetAnnot", "Render requested");
+
+                    page.Close();
+                    Log.d("PDFSetAnnot", "Page closed");
+
+                    if (m_listener != null) {
+                        Log.d("PDFSetAnnot", "Listener is not null, calling OnPDFPageModified");
+                        m_listener.OnPDFPageModified(m_annot_page.GetPageNo());
+                        Log.d("PDFSetAnnot", "OnPDFPageModified called on listener");
+                    }
+                } else {
+                    Log.e("PDFSetAnnot", "Matrix or Ink is null, cannot transform or add annotation.");
+                }
+            } else {
+                Log.e("PDFSetAnnot", "Page is null for pagenum: " + pagenum);
             }
+        } else {
+            Log.e("PDFSetAnnot", "m_annot_page is null, skipping page operations");
         }
-        m_status = STA_NONE;
-        m_ink.Destroy();
+
+        if (m_ink != null) {
+            m_ink.Destroy();
+            Log.d("PDFSetAnnot", "Ink destroyed");
+        }
+
         m_ink = null;
         m_annot_page = null;
-        if (m_canvas != null) m_canvas.invalidate();
+
+        if (m_canvas != null) {
+            m_canvas.invalidate();
+            Log.d("PDFSetAnnot", "Canvas invalidated");
+        } else {
+            Log.d("PDFSetAnnot", "Canvas is null, cannot invalidate");
+        }
     }
+
+
     public void PDFSetPolygon(int code) {
         if (code == 0)//start
         {

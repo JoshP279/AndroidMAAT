@@ -197,4 +197,23 @@ public class Ink
         Destroy();
         super.finalize();
     }
+    public Ink clone() {
+        Ink clonedInk = new Ink(this.width, this.color);
+
+        // Clone fields
+        clonedInk.m_method = this.m_method;
+        clonedInk.path_idx = this.path_idx;
+
+        // Deep copy of Path objects
+        clonedInk.m_path = new Path(this.m_path);
+        clonedInk.m_path_cur = new Path(this.m_path_cur);
+        clonedInk.m_path_append = new Path(this.m_path_append);
+
+        clonedInk.m_paint = new Paint(this.m_paint);
+
+        clonedInk.pt1 = this.pt1.clone();
+        clonedInk.pt2 = this.pt2.clone();
+        clonedInk.hand = create(this.width, this.color, 1);
+        return clonedInk;
+    }
 }

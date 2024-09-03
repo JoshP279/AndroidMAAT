@@ -13,5 +13,6 @@ data class AssessmentResponse(
     val moduleCode : String,
     val assessmentName : String,
     val numMarked: Int,
-    val totalSubmissions: Int
+    val totalSubmissions: Int,
+    val totalMarks: Int
 )

@@ -43,8 +43,10 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
     private lateinit var submissionsSearchView: SearchView
     private lateinit var adapter: SubmissionsAdapter
     private var assessmentID: Int = 0
+    private var totalMarks: Int = 0
     private var assessmentName = ""
     private var moduleCode = ""
+    private var markingStyle = ""
     private  var submissions = ArrayList<SubmissionsResponse>()
     private var filteredSubmissions = ArrayList<SubmissionsResponse>()
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
@@ -68,7 +70,9 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         assessmentName = intent.getStringExtra("assessmentName").toString()
         submissionsAssessmentNameTextView.text = assessmentName
         assessmentID = intent.getIntExtra("assessmentID",1)
+        totalMarks = intent.getIntExtra("totalMarks", 1)
         moduleCode = intent.getStringExtra("moduleCode").toString()
+        markingStyle = SharedPref.getString(this@SubmissionsActivity, "marking_style", getString(R.string.marking_style1)).toString()
         swipeRefreshLayout.setOnRefreshListener {
             RetrofitClient.loadSubmissions(this,assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
             swipeRefreshLayout.isRefreshing = false
@@ -157,7 +161,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
      */
     private fun setUpRecyclerView() {
         submissionsRecyclerView.layoutManager = LinearLayoutManager(applicationContext)
-        adapter = SubmissionsAdapter(filteredSubmissions, this)
+        adapter = SubmissionsAdapter(filteredSubmissions, this, totalMarks, markingStyle)
         submissionsRecyclerView.adapter = adapter
         adapter.setSubmissionUpdateListener(this)
         if (SharedPref.getBoolean(this, "OFFLINE_MODE", true)) {
@@ -277,6 +281,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             intent.putExtra("assessmentName", assessmentName)
             intent.putExtra("moduleCode", moduleCode)
             intent.putExtra("submissionFolderName", filteredSubmissions[position].submissionFolderName)
+            intent.putExtra("totalMarks", totalMarks)
             startActivity(intent)
         }else {
             Toast.makeText(applicationContext, R.string.pdf_fail_open, Toast.LENGTH_SHORT).show()

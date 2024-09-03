@@ -10,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +24,7 @@ import com.radaee.comm.Global;
 import com.radaee.dataclasses.SubmissionsResponse;
 import com.radaee.objects.FileUtil;
 import com.radaee.objects.RetrofitClient;
+import com.radaee.objects.SharedPref;
 import com.radaee.pdf.Document;
 import com.radaee.pdf.Page;
 import com.radaee.pdfmaster.R;
@@ -35,10 +35,7 @@ import com.radaee.view.IPDFLayoutView;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * PDFReaderActivity displays both the submission and the memo side by side.
@@ -91,6 +88,8 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private String assessmentName;
     private String moduleCode;
     private String submissionFolderName;
+    private int totalMarks;
+    private String markingStyle;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -133,6 +132,8 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             assessmentName = intent.getStringExtra("assessmentName");
             moduleCode = intent.getStringExtra("moduleCode");
             submissionFolderName = intent.getStringExtra("submissionFolderName");
+            totalMarks = intent.getIntExtra("totalMarks", 1);
+            markingStyle = SharedPref.INSTANCE.getString(this,"marking_style", getString(R.string.marking_style1));
         }
         if (submission != null && memo != null) {
             mPDFDoc = memo;
@@ -180,12 +181,12 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         studentNumber = submission.getStudentNumber();
         submissionID = submission.getSubmissionID();
         assessmentID = submission.getAssessmentID();
+        submissionFolderName = submission.getSubmissionFolderName();
         studentNum.setText(studentNumber);
         String folderName = assessmentID + "_" + moduleCode + "_" + assessmentName;
         File submissionFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
         File memoFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName);
         String memoName = "memo_" + assessmentID + ".pdf";
-        Log.e("path",submissionID + "_" + submission.getSubmissionFolderName() );
         File sFile = new File(submissionFile, submissionID + "_" + submission.getSubmissionFolderName());
         File mFile = new File(memoFile, memoName);
         checkAndDownloadPDFs(submissionFile, memoFile, folderName, sFile, mFile, submission);
@@ -203,6 +204,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      */
     private void checkAndDownloadPDFs(File submissionFile, File memoFile, String folderName, File sFile, File mFile, SubmissionsResponse submission) {
         String submissionName = submission.getSubmissionID() + "_" + submission.getSubmissionFolderName();
+        Log.e("check", submissionName);
         if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             initPDFReader(sFile.getPath(), mFile.getPath());
         } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName,submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
@@ -400,8 +402,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                     .setTitle("Annotations")
                     .setItems(annotationsArray, (dialog, which) -> {
                         UIAnnotMenu.IMemnuCallback selectedCallback = callbackList.get(which);
-                        selectedCallback.onAddCommonAnnotation(m_cur_page);
-                        Toast.makeText(v.getContext(), "Selected: " + selectedCallback.toString(), Toast.LENGTH_SHORT).show();
+                        sPDFView.PDFSetAnnot(null, m_cur_page);
                     })
                     .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
                     .show();
@@ -573,13 +574,13 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 BookmarkHandler.showBookmarks(this, sFilePath, pageno -> {sPDFView.PDFGotoPage(pageno);});
                 break;
             case R.id.action_setInProgress:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"In Progress", submissionFolderName);
+                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,totalMarks,"In Progress", submissionFolderName, markingStyle);
                 break;
             case R.id.action_setMarked:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"Marked", submissionFolderName);
+                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,totalMarks,"Marked", submissionFolderName, markingStyle);
                 break;
             case R.id.action_setUnmarked:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,studentNumber,"Unmarked", submissionFolderName);
+                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,totalMarks,"Unmarked", submissionFolderName, markingStyle);
             default:
                 break;
         }

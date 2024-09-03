@@ -2,7 +2,6 @@ package com.radaee.objects
 
 import android.content.Context
 import android.os.Environment
-import android.util.Log
 import android.widget.Toast
 import com.radaee.pdfmaster.R
 import java.io.File

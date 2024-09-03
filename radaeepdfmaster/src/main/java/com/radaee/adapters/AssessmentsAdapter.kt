@@ -3,9 +3,11 @@ package com.radaee.adapters
 import android.app.ProgressDialog
 import android.content.Context
 import android.os.Environment
+import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -41,6 +43,10 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
         val item = mList[position]
         holder.moduleCodeTextView.text = item.moduleCode
         holder.assessmentNameTextView.text = item.assessmentName
+        holder.assessmentNameTextView.apply {
+            isVerticalScrollBarEnabled = true
+            movementMethod = ScrollingMovementMethod()
+        }
         holder.assessmentTotalSubmissionsTextView.text = String.format(context.getString(R.string.submissions_marked), item.totalSubmissions)
         holder.assessmentNumMarkedTextView.text =  String.format(item.numMarked.toString() + "/")
         holder.overflowMenu.setOnClickListener { showPopupMenu(holder.overflowMenu, position)}

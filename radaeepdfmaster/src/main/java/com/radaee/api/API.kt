@@ -5,6 +5,7 @@ import com.radaee.dataclasses.LogInResponse
 import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SingleResponse
 import com.radaee.dataclasses.SubmissionsResponse
+import com.radaee.dataclasses.UpdateMarkingStyleRequest
 import com.radaee.dataclasses.UpdateSubmissionRequest
 import okhttp3.MultipartBody
 import retrofit2.Call
@@ -95,7 +96,13 @@ interface API {
     @PUT("/uploadMarkedSubmission")
     fun uploadSubmissionPDF(
         @Part("submissionID") submissionID: Int,
-        @Part("assessmentID") assessmentID: Int,
+        @Part("totalMarks") totalMarks: Int,
+        @Part("markingStyle") markingStyle: String,
         @Part pdfFile: MultipartBody.Part
+    ): Call<SingleResponse>
+
+    @PUT("/updateMarkingStyle")
+    fun updateMarkingStyle(
+        @Body request: UpdateMarkingStyleRequest
     ): Call<SingleResponse>
 }

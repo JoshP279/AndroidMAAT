@@ -95,6 +95,7 @@ class ViewAssessmentsFragment : Fragment() {
                 intent.putExtra("assessmentName",assessment.assessmentName)
                 intent.putExtra("assessmentID", assessment.assessmentID)
                 intent.putExtra("moduleCode", assessment.moduleCode)
+                intent.putExtra("totalMarks", assessment.totalMarks)
                 startActivity(intent)
             }
         })
@@ -113,6 +114,8 @@ class ViewAssessmentsFragment : Fragment() {
             assessments.clear()
 
             filteredAssessments.clear()
+            // For each directory, create an assessment object and add it to the list
+            // These values are incorrect, but they enable offline functionality
             for (directory in assessmentDirectories) {
                 val assessmentName = directory.name
                 val elem = assessmentName.split("_")
@@ -121,7 +124,8 @@ class ViewAssessmentsFragment : Fragment() {
                     assessmentID = elem[0].toInt(),
                     moduleCode = elem[1],
                     totalSubmissions = 0,
-                    numMarked = 0
+                    numMarked = 0,
+                    totalMarks = 0
                 )
                 assessments.add(assessment)
             }
