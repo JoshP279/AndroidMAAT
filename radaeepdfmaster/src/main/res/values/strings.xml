@@ -179,4 +179,6 @@
     <string name="save_explainer">This will save your annotations to the PDF document. Make sure you save before setting the submission as marked!</string>
     <string name="ink_explainer">This button will activate annotation functionality; first click will allow you to edit the submission, and second will make those edits to the submission.</string>
     <string name="text_explainer">This button will allow you to type out comments.</string>
+    <string name="pdf_reader_help_header">Assess Submissions</string>
+    <string name="pdfreader_help_text">This activity allows you to assess submissions. Try long pressing each of the buttons in the stylus bar if you are unsure of what they do.</string>
 </resources>

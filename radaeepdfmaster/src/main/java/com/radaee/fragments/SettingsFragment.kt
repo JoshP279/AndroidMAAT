@@ -44,20 +44,24 @@ class SettingsFragment : Fragment() {
         settingsHelper.setOnClickListener {
             displayHelperDialog()
         }
+
         setUpTheme()
         setUpMarkingChoiceSpinner()
+
         return view
     }
 
-
     private fun setUpMarkingChoiceSpinner() {
         val savedMarkingStyle = SharedPref.getString(requireContext(), "marking_style", null)
-        val markingChoices: Array<String> = if (savedMarkingStyle == getString(R.string.marking_style1)) {
-            arrayOf(getString(R.string.marking_style2), getString(R.string.marking_style1))
-        } else {
-            arrayOf(getString(R.string.marking_style1), getString(R.string.marking_style2))
-        }
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, markingChoices)
+        val markingChoices: Array<String> =
+            if (savedMarkingStyle == getString(R.string.marking_style1)) {
+                arrayOf(getString(R.string.marking_style2), getString(R.string.marking_style1))
+            } else {
+                arrayOf(getString(R.string.marking_style1), getString(R.string.marking_style2))
+            }
+
+        val adapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, markingChoices)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         markingChoiceSpinner.adapter = adapter
 
@@ -65,22 +69,56 @@ class SettingsFragment : Fragment() {
         markingChoiceSpinner.setSelection(savedPosition)
 
         markingChoiceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                // Prevent triggering when fragment is recreated due to theme change
                 if (isFirstSelection) {
                     isFirstSelection = false
                     return
                 }
+
+                // If the theme was changed, skip the spinner action
+                val themeChanged = SharedPref.getBoolean(requireContext(), "THEME_CHANGED", false)
+                if (themeChanged) {
+                    SharedPref.saveBoolean(requireContext(), "THEME_CHANGED", false)
+                    return
+                }
+
                 val markerEmail = SharedPref.getString(requireContext(), "email", "")
                 val selectedItem = parent.getItemAtPosition(position).toString()
+
                 if (!markerEmail.isNullOrEmpty()) {
                     when (selectedItem) {
                         getString(R.string.marking_style1) -> {
-                            SharedPref.saveString(requireContext(), "marking_style", getString(R.string.marking_style1))
-                            RetrofitClient.updateMarkingStyle(requireContext(), requireView(),markerEmail, getString(R.string.marking_style1))
+                            SharedPref.saveString(
+                                requireContext(),
+                                "marking_style",
+                                getString(R.string.marking_style1)
+                            )
+                            RetrofitClient.updateMarkingStyle(
+                                requireContext(),
+                                requireView(),
+                                markerEmail,
+                                getString(R.string.marking_style1)
+                            )
                         }
+
                         getString(R.string.marking_style2) -> {
-                            SharedPref.saveString(requireContext(), "marking_style", getString(R.string.marking_style2))
-                            RetrofitClient.updateMarkingStyle(requireContext(), requireView(), markerEmail, getString(R.string.marking_style2))
+                            SharedPref.saveString(
+                                requireContext(),
+                                "marking_style",
+                                getString(R.string.marking_style2)
+                            )
+                            RetrofitClient.updateMarkingStyle(
+                                requireContext(),
+                                requireView(),
+                                markerEmail,
+                                getString(R.string.marking_style2)
+                            )
                         }
                     }
                 }
@@ -101,10 +139,21 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setUpTheme() {
-        val isSystemDarkMode = (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        val isSystemDarkMode =
+            (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
         val isDarkModePref = SharedPref.getBoolean(requireContext(), "DARK_MODE", isSystemDarkMode)
         themeSwitch.isChecked = isDarkModePref
+
         themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val selectedMarkingStyle = markingChoiceSpinner.selectedItem.toString()
+            SharedPref.saveString(requireContext(), "marking_style", selectedMarkingStyle)
+
+            // Set a flag to indicate that the theme was changed
+            SharedPref.saveBoolean(requireContext(), "THEME_CHANGED", true)
+
+            // Reset isFirstSelection after theme change
+            isFirstSelection = true
+
             if (isChecked) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
@@ -118,5 +167,10 @@ class SettingsFragment : Fragment() {
         val intent = Intent(requireContext(), LogInActivity::class.java)
         startActivity(intent)
         activity?.finish()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isFirstSelection = true
     }
 }
