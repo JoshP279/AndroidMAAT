@@ -36,7 +36,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
-
 /**
  * @author Davide created on 15/01/2016.
  * <p>
@@ -296,11 +295,6 @@ public class CommonUtil {
     }
     //josh code
     public static void showBothPDFOutlines(final IPDFLayoutView mPdfLayoutView, final IPDFLayoutView sPdfLayoutView, Context mContext) {
-        if (mPdfLayoutView.PDFGetDoc() == null || sPdfLayoutView.PDFGetDoc() == null) {
-            Toast.makeText(mContext, R.string.no_pdf_outlines, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         if (mPdfLayoutView.PDFGetDoc().GetOutlines() == null || sPdfLayoutView.PDFGetDoc().GetOutlines() == null) {
             Toast.makeText(mContext, R.string.no_pdf_outlines, Toast.LENGTH_SHORT).show();
             return;

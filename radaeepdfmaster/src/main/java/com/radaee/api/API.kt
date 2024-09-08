@@ -88,7 +88,8 @@ interface API {
      * Upload the marked submission PDF
      * @Multipart must be used here, as the submissionID, assessmentID and pdfFile are sent as form-data in the request (this is necessary for the pdfFile to be handled correctly by server)
      * @param submissionID: ID of the submission
-     * @param assessmentID: ID of the assessment
+     * @param totalMarks: Total marks of the submission
+     * @param markingStyle: Marking style of the submission
      * @param pdfFile: MultipartBody.Part
      * @return SingleResponse containing the result of the upload request
      */

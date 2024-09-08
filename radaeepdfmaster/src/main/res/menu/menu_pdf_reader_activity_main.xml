@@ -34,12 +34,12 @@
         android:orderInCategory="100"
         android:title="@string/text_action_menu_label"
         app:showAsAction="always" />
-    <item
-        android:id="@+id/action_book_mark"
-        android:icon="@drawable/ic_bookmark"
-        android:orderInCategory="100"
-        android:title="@string/text_book_mark_list_label"
-        app:showAsAction="ifRoom" />
+<!--    <item-->
+<!--        android:id="@+id/action_book_mark"-->
+<!--        android:icon="@drawable/ic_bookmark"-->
+<!--        android:orderInCategory="100"-->
+<!--        android:title="@string/text_book_mark_list_label"-->
+<!--        app:showAsAction="ifRoom" />-->
 
     <item
         android:id="@+id/action_mark_menu"

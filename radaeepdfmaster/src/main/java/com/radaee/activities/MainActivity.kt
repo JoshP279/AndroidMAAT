@@ -8,12 +8,12 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import com.radaee.comm.Global
 import com.radaee.fragments.AboutFragment
 import com.radaee.fragments.HelpFragment
 import com.radaee.fragments.SettingsFragment
 import com.radaee.fragments.ViewAssessmentsFragment
 import com.radaee.pdfmaster.R
+
 /*
     MainActivity is the main activity of the app. It is responsible for handling the navigation drawer and the fragments that are displayed in the app.
     The navigation drawer contains the following options:

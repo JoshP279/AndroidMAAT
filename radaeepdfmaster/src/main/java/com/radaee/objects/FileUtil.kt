@@ -2,8 +2,6 @@ package com.radaee.objects
 
 import android.content.Context
 import android.os.Environment
-import android.widget.Toast
-import com.radaee.pdfmaster.R
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -29,7 +27,6 @@ object FileUtil {
             file.absolutePath
         } catch (e: IOException) {
             e.printStackTrace()
-            Toast.makeText(context, R.string.pdf_fail_save, Toast.LENGTH_SHORT).show()
             null
         }
     }
@@ -49,11 +46,9 @@ object FileUtil {
             val fos = FileOutputStream(file)
             fos.write(pdfData)
             fos.close()
-            Toast.makeText(context, "PDF saved as $fileName in $documentsDir", Toast.LENGTH_SHORT).show()
             file.absolutePath
         } catch (e: IOException) {
             e.printStackTrace()
-            Toast.makeText(context, R.string.pdf_fail_save, Toast.LENGTH_SHORT).show()
             null
         }
     }

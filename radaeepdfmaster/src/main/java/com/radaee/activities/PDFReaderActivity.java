@@ -12,7 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,6 +24,7 @@ import com.radaee.dataclasses.SubmissionsResponse;
 import com.radaee.objects.FileUtil;
 import com.radaee.objects.RetrofitClient;
 import com.radaee.objects.SharedPref;
+import com.radaee.objects.SnackbarUtil;
 import com.radaee.pdf.Document;
 import com.radaee.pdf.Page;
 import com.radaee.pdfmaster.R;
@@ -56,6 +56,8 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     /**
      * the below two static variables are used to pass the submission and memo documents from the SubmissionActivity to the PDFReaderActivity.
      */
+    private static final long DOUBLE_CLICK_TIME_DELTA = 300;
+    private long lastClickTime = 0;
     static public Document submission;
     static public Document memo;
     static public List<SubmissionsResponse> filteredSubmissions;
@@ -79,6 +81,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private ImageButton saveButton;
     private ImageButton bookmarkButton;
     private ImageButton commentButton;
+    private ImageButton keyboardButton;
     private TextView studentNum;
     private ImageButton nextSubmissionButton;
     private ImageButton prevSubmissionButton;
@@ -105,20 +108,22 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         undoButton = findViewById(R.id.undoButton);
         redoButton = findViewById(R.id.redoButton);
         saveButton = findViewById(R.id.saveButton);
-        commentButton = findViewById(R.id.commentButton);
-        bookmarkButton = findViewById(R.id.bookMarkButton);
+//        commentButton = findViewById(R.id.commentButton);
+//        bookmarkButton = findViewById(R.id.bookMarkButton);
+        keyboardButton = findViewById(R.id.typedAnnotButton);
         prevSubmissionButton = findViewById(R.id.btnPrevSubmission);
         nextSubmissionButton = findViewById(R.id.btnNextSubmission);
         nextSubmissionButton.setOnClickListener(submissionClickListener);
         prevSubmissionButton.setOnClickListener(submissionClickListener);
+        keyboardButton.setOnClickListener(textClickListener);
         prevSubmissionButton.setEnabled(currentPos>0 && currentPos < filteredSubmissions.size());
         nextSubmissionButton.setEnabled(currentPos>=0 && currentPos < filteredSubmissions.size()-1);
         inkButton.setOnClickListener(inkClickListener);
         undoButton.setOnClickListener(undoClickListener);
         redoButton.setOnClickListener(redoClickListener);
         saveButton.setOnClickListener(saveClickListener);
-        bookmarkButton.setOnClickListener(bookmarkClickListener);
-        commentButton.setOnClickListener(commentsClickListener);
+//        bookmarkButton.setOnClickListener(bookmarkClickListener);
+//        commentButton.setOnClickListener(commentsClickListener);
         prevSubmissionButton.setVisibility(currentPos == 0 ? View.INVISIBLE : View.VISIBLE);
         nextSubmissionButton.setVisibility(currentPos == filteredSubmissions.size() - 1 ? View.INVISIBLE : View.VISIBLE);
         setupDivider();
@@ -145,6 +150,42 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             mPDFView.PDFOpen(mPDFDoc, PDFReaderActivity.this);
             mFilePath = mPDFDoc.getDocPath();
         }
+        InitLongClickListeners();
+    }
+
+    private void InitLongClickListeners() {
+        undoButton.setOnLongClickListener(v -> {
+            showAlertDialog(getString(R.string.undo_explainer));
+            return true;
+        });
+
+        redoButton.setOnLongClickListener(v -> {
+            showAlertDialog(getString(R.string.redo_explainer));
+            return true;
+        });
+
+        saveButton.setOnLongClickListener(v -> {
+            showAlertDialog(getString(R.string.save_explainer));
+            return true;
+        });
+
+        inkButton.setOnLongClickListener(v -> {
+            showAlertDialog(getString(R.string.ink_explainer));
+            return true;
+        });
+
+        keyboardButton.setOnLongClickListener(v -> {
+            showAlertDialog(getString(R.string.text_explainer));
+            return true;
+        });
+    }
+
+    private void showAlertDialog(String message) {
+        new AlertDialog.Builder(PDFReaderActivity.this)
+                .setTitle(getString(R.string.button_explainer))
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss()) // Action on "OK"
+                .show();
     }
 
     /**
@@ -208,36 +249,36 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             initPDFReader(sFile.getPath(), mFile.getPath());
         } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName,submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
-            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submissionName, folderName, path -> {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, findViewById(android.R.id.content), submission.getSubmissionID(), submissionName, folderName, path -> {
                 if (path != null) {
                     initPDFReader(path, mFile.getPath());
                 } else {
-                    Toast.makeText(getApplicationContext(), R.string.pdf_fail_download, Toast.LENGTH_SHORT).show();
+                    SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this);
                 }
                 return null;
             });
         } else if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile,submissionName, submission.getStudentNumber()) && !FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
-            RetrofitClient.INSTANCE.downloadMemoPDF(this, assessmentID, folderName, path -> {
+            RetrofitClient.INSTANCE.downloadMemoPDF(this, findViewById(android.R.id.content), assessmentID, folderName, path -> {
                 if (path != null) {
                     initPDFReader(sFile.getPath(), path);
                 } else {
-                    Toast.makeText(getApplicationContext(), R.string.pdf_fail_download, Toast.LENGTH_SHORT).show();
+                    SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this);
                 }
                 return null;
             });
         } else {
-            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, submission.getSubmissionID(), submissionName, folderName, sPath -> {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, findViewById(android.R.id.content), submission.getSubmissionID(), submissionName, folderName, sPath -> {
                 if (sPath != null) {
-                    RetrofitClient.INSTANCE.downloadMemoPDF(this, assessmentID, folderName, mPath -> {
+                    RetrofitClient.INSTANCE.downloadMemoPDF(this,findViewById(android.R.id.content), assessmentID, folderName, mPath -> {
                         if (mPath != null) {
                             initPDFReader(sPath, mPath);
                         } else {
-                            Toast.makeText(getApplicationContext(), R.string.pdf_fail_download, Toast.LENGTH_SHORT).show();
+                            SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this);
                         }
                         return null;
                     });
                 } else {
-                    Toast.makeText(getApplicationContext(), R.string.pdf_fail_download, Toast.LENGTH_SHORT).show();
+                    SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this);
                 }
                 return null;
             });
@@ -264,7 +305,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
 //            mPDFView.PDFOpen(mPDFDoc, PDFReaderActivity.this);
 //            mFilePath = mPDFDoc.getDocPath();
         } else {
-            Toast.makeText(getApplicationContext(), R.string.pdf_fail_open, Toast.LENGTH_SHORT).show();
+            SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_open), this);
         }
     }
     /**
@@ -297,7 +338,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             if (sPDFView.PDFCanUndo()){
                 sPDFView.PDFUndo();
             }else{
-                Toast.makeText(getApplicationContext(),R.string.no_more_undo, Toast.LENGTH_LONG).show();
+                SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.no_more_undo), PDFReaderActivity.this);
             }
         }
     };
@@ -312,7 +353,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             if (sPDFView.PDFCanRedo()) {
                 sPDFView.PDFRedo();
             }else{
-                Toast.makeText(getApplicationContext(),R.string.no_more_redo, Toast.LENGTH_LONG).show();
+                SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.no_more_redo), PDFReaderActivity.this);
             }
         }
     };
@@ -330,9 +371,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 sPDFView.PDFSetInk(1);
                 sPDFView.PDFSave();
                 m_modified = false;
-                Toast.makeText(getApplicationContext(),R.string.saved_message, Toast.LENGTH_LONG).show();
+                SnackbarUtil.INSTANCE.showSuccessSnackBar(findViewById(android.R.id.content), getString(R.string.saved_message), PDFReaderActivity.this);
             }else{
-                Toast.makeText(getApplicationContext(),R.string.fail_saved_message, Toast.LENGTH_LONG).show();
+                SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.fail_saved_message), PDFReaderActivity.this);
             }
         }
     };
@@ -570,17 +611,17 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             case R.id.action_menu:
                 CommonUtil.showBothPDFOutlines(sPDFView,mPDFView, this);
                 break;
-            case R.id.action_book_mark:
-                BookmarkHandler.showBookmarks(this, sFilePath, pageno -> {sPDFView.PDFGotoPage(pageno);});
-                break;
+//            case R.id.action_book_mark:
+//                BookmarkHandler.showBookmarks(this, sFilePath, pageno -> {sPDFView.PDFGotoPage(pageno);});
+//                break;
             case R.id.action_setInProgress:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,totalMarks,"In Progress", submissionFolderName, markingStyle);
+                RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content), submissionID,assessmentID,totalMarks,"In Progress", submissionFolderName, markingStyle);
                 break;
             case R.id.action_setMarked:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,totalMarks,"Marked", submissionFolderName, markingStyle);
+                RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content),submissionID,assessmentID,totalMarks,"Marked", submissionFolderName, markingStyle);
                 break;
             case R.id.action_setUnmarked:
-                RetrofitClient.INSTANCE.updateSubmission(this,submissionID,assessmentID,totalMarks,"Unmarked", submissionFolderName, markingStyle);
+                RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content),submissionID,assessmentID,totalMarks,"Unmarked", submissionFolderName, markingStyle);
             default:
                 break;
         }
@@ -594,6 +635,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         divider.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                sPDFView.PDFSetInk(1);
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_MOVE:
                         int newX = (int) event.getRawX();
@@ -609,6 +651,14 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                         return false;
                 }
             }
+        });
+        divider.setOnClickListener(v -> {
+            long clickTime = System.currentTimeMillis();
+            if (clickTime - lastClickTime < DOUBLE_CLICK_TIME_DELTA) {
+                sPDFView.PDFSetInk(1);
+                adjustWidths(0.5f, 0.5f);
+            }
+            lastClickTime = clickTime;
         });
     }
 

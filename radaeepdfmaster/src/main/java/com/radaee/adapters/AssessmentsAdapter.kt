@@ -2,25 +2,22 @@ package com.radaee.adapters
 
 import android.app.ProgressDialog
 import android.content.Context
-import android.os.Environment
 import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.dataclasses.AssessmentResponse
 import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
+import com.radaee.objects.SnackbarUtil
 import com.radaee.pdfmaster.R
-import java.io.File
 
 /**
  * Adapter for the recycler view that displays the assessments
@@ -28,7 +25,7 @@ import java.io.File
  * @param context context of the activity, which is @ViewAssessmentsFragment
  * This adapter just binds the necessary data to the assessments card view
  */
-class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private val context: Context) : RecyclerView.Adapter<AssessmentsAdapter.ViewHolder>() {
+class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private val context: Context, private val rootView: View) : RecyclerView.Adapter<AssessmentsAdapter.ViewHolder>() {
     private var listener: OnItemClickListener? = null
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -87,17 +84,17 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
                     progressDialog.setCancelable(false)
                     progressDialog.show()
 
-                    RetrofitClient.getSubmissions(context, cur.assessmentID, submissions) {
+                    RetrofitClient.getSubmissions(context,rootView, cur.assessmentID, submissions) {
                         val folderName =
                             cur.assessmentID.toString() + "_" + cur.moduleCode + "_" + cur.assessmentName
                         var remainingDownloads = submissions.size + 1 // +1 for the memo
-                        RetrofitClient.downloadMemoPDF(context, cur.assessmentID, folderName) { path ->
+                        RetrofitClient.downloadMemoPDF(context, rootView, cur.assessmentID, folderName) { path ->
                             if (path == null) {
-                                Toast.makeText(
-                                    context,
-                                    R.string.pdf_fail_download,
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                SnackbarUtil.showErrorSnackBar(
+                                    rootView,
+                                    context.getString(R.string.pdf_fail_download),
+                                    context
+                                )
                             }
                             remainingDownloads--
 
@@ -110,16 +107,17 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
                                 submission.submissionID.toString() + "_" + submission.submissionFolderName
                             RetrofitClient.downloadSubmissionPDF(
                                 context,
+                                rootView,
                                 submission.submissionID,
                                 submissionFileName,
                                 folderName
                             ) { path ->
                                 if (path == null) {
-                                    Toast.makeText(
-                                        context,
-                                        R.string.pdf_fail_download,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    SnackbarUtil.showErrorSnackBar(
+                                        rootView,
+                                        context.getString(R.string.pdf_fail_download),
+                                        context
+                                    )
                                 }
                                 remainingDownloads--
                                 if (remainingDownloads == 0) {
@@ -131,7 +129,6 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
                             progressDialog.dismiss()
                         }
                     }
-
                     true
                 }
 

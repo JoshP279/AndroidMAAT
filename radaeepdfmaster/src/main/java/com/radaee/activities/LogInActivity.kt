@@ -12,10 +12,10 @@ import android.provider.Settings
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -23,6 +23,7 @@ import com.radaee.objects.RegexUtils
 import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
+import com.radaee.objects.SnackbarUtil
 
 /**
  * LogInActivity is the first activity that is launched when the app is opened.
@@ -104,23 +105,24 @@ class LogInActivity : AppCompatActivity() {
         }
     }
     /**
-     * Checks if the email and password fields are empty. If they are, it will display a toast message to the user.
+     * Checks if the email and password fields are empty. If they are, it will display a SnackBar message to the user.
      * @return true if any of the fields are empty, false otherwise
      */
     private fun checkEmptyInput(): Boolean {
         val emptyEmail = emailEditText.text.toString().isEmpty()
         val emptyPassword = passwordEditText.text.toString().isEmpty()
+        val rootView = findViewById<View>(android.R.id.content)
         return when {
             emptyEmail && emptyPassword -> {
-                Toast.makeText(this, R.string.enter_email_address_and_password, Toast.LENGTH_SHORT).show()
+                SnackbarUtil.showErrorSnackBar(rootView, getString(R.string.enter_email_address_and_password), this)
                 true
             }
             emptyEmail -> {
-                Toast.makeText(this, R.string.enter_email_address, Toast.LENGTH_SHORT).show()
+                SnackbarUtil.showErrorSnackBar(rootView, getString(R.string.enter_email_address), this)
                 true
             }
             emptyPassword -> {
-                Toast.makeText(this, R.string.enter_password, Toast.LENGTH_SHORT).show()
+                SnackbarUtil.showErrorSnackBar(rootView, getString(R.string.enter_password), this)
                 true
             }
             else -> false
@@ -176,7 +178,7 @@ class LogInActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                Toast.makeText(this, R.string.permissions_granted, Toast.LENGTH_SHORT).show()
+                SnackbarUtil.showInfoSnackBar(findViewById(android.R.id.content), getString(R.string.permissions_granted), this)
             }
         }
     }
@@ -190,7 +192,7 @@ class LogInActivity : AppCompatActivity() {
                 if (Environment.isExternalStorageManager()) {
                     requestReadWritePermissions()
                 } else {
-                    Toast.makeText(this, R.string.permissions_denied, Toast.LENGTH_SHORT).show()
+                    SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.permissions_denied), this)
                 }
             }
         }

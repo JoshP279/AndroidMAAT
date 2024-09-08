@@ -76,11 +76,11 @@ class SettingsFragment : Fragment() {
                     when (selectedItem) {
                         getString(R.string.marking_style1) -> {
                             SharedPref.saveString(requireContext(), "marking_style", getString(R.string.marking_style1))
-                            RetrofitClient.updateMarkingStyle(requireContext(), markerEmail, getString(R.string.marking_style1))
+                            RetrofitClient.updateMarkingStyle(requireContext(), requireView(),markerEmail, getString(R.string.marking_style1))
                         }
                         getString(R.string.marking_style2) -> {
                             SharedPref.saveString(requireContext(), "marking_style", getString(R.string.marking_style2))
-                            RetrofitClient.updateMarkingStyle(requireContext(), markerEmail, getString(R.string.marking_style2))
+                            RetrofitClient.updateMarkingStyle(requireContext(), requireView(), markerEmail, getString(R.string.marking_style2))
                         }
                     }
                 }

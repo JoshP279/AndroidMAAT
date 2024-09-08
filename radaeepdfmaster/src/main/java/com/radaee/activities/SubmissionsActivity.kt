@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter
 import android.widget.SearchView
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +24,7 @@ import com.radaee.decorators.EqualSpaceItemDecoration
 import com.radaee.objects.FileUtil
 import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
+import com.radaee.objects.SnackbarUtil
 import com.radaee.pdf.Document
 import com.radaee.pdfmaster.R
 import java.io.File
@@ -74,7 +74,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         moduleCode = intent.getStringExtra("moduleCode").toString()
         markingStyle = SharedPref.getString(this@SubmissionsActivity, "marking_style", getString(R.string.marking_style1)).toString()
         swipeRefreshLayout.setOnRefreshListener {
-            RetrofitClient.loadSubmissions(this,assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
+            RetrofitClient.loadSubmissions(this,findViewById(android.R.id.content), assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
             swipeRefreshLayout.isRefreshing = false
         }
 
@@ -130,7 +130,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
                     loadOfflineSubmissions()
                 }
                 else{
-                    RetrofitClient.loadSubmissions(this,assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
+                    RetrofitClient.loadSubmissions(this,findViewById(android.R.id.content),assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
                 }
             }
         }
@@ -161,14 +161,15 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
      */
     private fun setUpRecyclerView() {
         submissionsRecyclerView.layoutManager = LinearLayoutManager(applicationContext)
-        adapter = SubmissionsAdapter(filteredSubmissions, this, totalMarks, markingStyle)
+        adapter = SubmissionsAdapter(filteredSubmissions, this, findViewById(android.R.id.content), totalMarks, markingStyle)
         submissionsRecyclerView.adapter = adapter
         adapter.setSubmissionUpdateListener(this)
         if (SharedPref.getBoolean(this, "OFFLINE_MODE", true)) {
             loadOfflineSubmissions()
         }
+
         else{
-            RetrofitClient.loadSubmissions(this,assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
+            RetrofitClient.loadSubmissions(this,findViewById(android.R.id.content), assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
         }
 
         submissionsRecyclerView.addItemDecoration(EqualSpaceItemDecoration(10))
@@ -209,7 +210,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             adapter.notifyDataSetChanged()
 
         } else {
-            Toast.makeText(this, R.string.no_offline_submissions, Toast.LENGTH_SHORT).show()
+            SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.no_offline_submissions), this)
         }
     }
 
@@ -232,28 +233,28 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         if (FileUtil.checkSubmissionExists(submissionFile, submissionFileName, submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
             initPDFReaderIntent(sFile.path,mFile.path, submission.studentNumber, submission.submissionID, position)
         }else if (!FileUtil.checkSubmissionExists(submissionFile, submissionFileName,submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
-            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submissionFileName, folderName) { path ->
+            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,findViewById(android.R.id.content), submission.submissionID, submissionFileName, folderName) { path ->
                 if (path != null) {
                     initPDFReaderIntent(path, mFile.path, submission.studentNumber, submission.submissionID, position)
                 } else {
-                    Toast.makeText(applicationContext, R.string.pdf_fail_download, Toast.LENGTH_SHORT).show()
+                    SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this)
                 }
             }
         }else if (FileUtil.checkSubmissionExists(submissionFile, submissionFileName,  submission.studentNumber) && !FileUtil.checkMemoExists(memoFile,assessmentID)){
-            RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,assessmentID, folderName) {path ->
+            RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,findViewById(android.R.id.content), assessmentID, folderName) {path ->
                 if (path != null) {
                     initPDFReaderIntent(sFile.path, path, submission.studentNumber, submission.submissionID, position)
                 } else {
-                    Toast.makeText(applicationContext, R.string.pdf_fail_download, Toast.LENGTH_SHORT).show()
+                    SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this)
                 }
             }
         }else{
-            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,submission.submissionID, submissionFileName, folderName) { sPath ->
-                RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,assessmentID, folderName) {mPath ->
+            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,findViewById(android.R.id.content), submission.submissionID, submissionFileName, folderName) { sPath ->
+                RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,findViewById(android.R.id.content), assessmentID, folderName) {mPath ->
                     if (sPath != null && mPath != null) {
                         initPDFReaderIntent(sPath, mPath, submission.studentNumber, submission.submissionID, position)
                     } else {
-                        Toast.makeText(applicationContext, R.string.pdf_fail_download, Toast.LENGTH_SHORT).show()
+                        SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this)
                     }
                 }
             }
@@ -284,7 +285,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
             intent.putExtra("totalMarks", totalMarks)
             startActivity(intent)
         }else {
-            Toast.makeText(applicationContext, R.string.pdf_fail_open, Toast.LENGTH_SHORT).show()
+            SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_open), this)
         }
     }
 
@@ -340,7 +341,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
      */
     override fun onSubmissionUpdated() {
         Handler(Looper.getMainLooper()).postDelayed({
-            RetrofitClient.loadSubmissions(this, assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
+            RetrofitClient.loadSubmissions(this, findViewById(android.R.id.content), assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
             swipeRefreshLayout.isRefreshing = false
         }, 1000)
     }

@@ -8,7 +8,7 @@
     <color name="white">#FFFFFF</color>
     <color name="green">#4CAF50</color>
     <color name="red">#F44336</color>
-    <color name="borderColor">@color/white</color>
+    <color name="borderColor">@color/colorPrimary</color>
     <color name="actionBarTextColor">#888888</color>
     <color name="actionButtonBG">#45A6FF</color>
 </resources>

@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#0A84FF</color>
+    <color name="colorPrimaryLight">#0A84FF</color>
+
     <color name="colorPrimaryDark">#006BB6</color>
+    <color name="colorPrimaryDarkLight">#006BB6</color>
+
     <color name="colorAccent">#FF9500</color>
+    <color name="colorAccentLight">#FF9500</color>
+
     <color name="windowBackground">#F5F5F5</color>
+    <color name="windowBackgroundLight">#F5F5F5</color>
+
     <color name="black">#000000</color>
+    <color name="blackLight">#000000</color>
+
     <color name="white">#FFFFFF</color>
+    <color name="whiteLight">#FFFFFF</color>
+
     <color name="green">#4CAF50</color>
+    <color name="greenLight">#4CAF50</color>
+
     <color name="red">#F44336</color>
-    <color name="borderColor">@color/black</color>
+    <color name="redLight">#F44336</color>
+
+    <color name="borderColor">@color/colorPrimary</color>
+    <color name="borderColorLight">@color/colorPrimary</color>
+
     <color name="actionBarTextColor">#888888</color>
+    <color name="actionBarTextColorLight">#888888</color>
+
     <color name="actionButtonBG">#45A6FF</color>
+    <color name="actionButtonBGLight">#45A6FF</color>
+
 
 </resources>

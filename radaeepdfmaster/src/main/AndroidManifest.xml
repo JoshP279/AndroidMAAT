@@ -41,8 +41,8 @@
             android:name="com.radaee.activities.MainActivity"
             android:exported="false" />
         <activity
-
             android:name="com.radaee.activities.PDFReaderActivity"
+            android:theme="@style/Theme.MAAT.Light"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
             android:parentActivityName="com.radaee.activities.SubmissionsActivity">

@@ -4,7 +4,7 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Environment
-import android.widget.Toast
+import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.activities.LogInActivity
 import com.radaee.activities.MainActivity
@@ -62,6 +62,7 @@ object RetrofitClient {
      */
     fun attemptLogin(context: Context, email:String, password:String) {
         api.login(email, password).enqueue(object : Callback<LogInResponse> {
+            val rootView = (context as LogInActivity).findViewById<View>(android.R.id.content)
             override fun onResponse(
                 call: Call<LogInResponse>,
                 response: Response<LogInResponse>
@@ -79,14 +80,12 @@ object RetrofitClient {
                         (context as LogInActivity).finish()
                     }
                 } else {
-                    Toast.makeText(context,
-                        context.getString(R.string.invalid_username_or_password), Toast.LENGTH_SHORT)
-                        .show()
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.invalid_username_or_password), context)
                 }
             }
             override fun onFailure(call: Call<LogInResponse>, t: Throwable) {
                 t.printStackTrace()
-                Toast.makeText(context, context.getString(R.string.server_connect_fail), Toast.LENGTH_SHORT).show()
+                SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
             }
         })
     }
@@ -99,10 +98,10 @@ object RetrofitClient {
      * This list is used to filter the assessments based on the search query in ViewAssessmentsFragment.
      * @param assessmentsList The RecyclerView that displays the assessments.
      */
-    fun loadAssessments(context: Context,assessments: ArrayList<AssessmentResponse>, filteredAssessments: ArrayList<AssessmentResponse>,assessmentsList: RecyclerView) {
+    fun loadAssessments(context: Context,rootView: View, assessments: ArrayList<AssessmentResponse>, filteredAssessments: ArrayList<AssessmentResponse>,assessmentsList: RecyclerView) {
         val savedEmail:String? = SharedPref.getString(context,"email", null)
         if (savedEmail.isNullOrEmpty()) {
-            Toast.makeText(context, "No saved email found", Toast.LENGTH_SHORT).show()
+            SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.no_saved_email), context)
             return
         }
         api.getAssessments(savedEmail)
@@ -122,20 +121,12 @@ object RetrofitClient {
                             SharedPref.saveBoolean(context,"OFFLINE_MODE",false)
                         }
                     } else {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.fail_load_assessments),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.fail_load_assessments), context)
                     }
                 }
                 override fun onFailure(call: Call<List<AssessmentResponse>>, t: Throwable) {
                     t.printStackTrace()
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.server_connect_fail),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
                 }
             })
     }
@@ -146,7 +137,7 @@ object RetrofitClient {
      * @param assessmentID The ID of the assessment that the submissions belong to.
      * @param submissions The list of submissions that will be downloaded.
      */
-    fun getSubmissions(context: Context, assessmentID: Int, submissions: MutableList<SubmissionsResponse>, callback: () -> Unit) {
+    fun getSubmissions(context: Context, rootView: View, assessmentID: Int, submissions: MutableList<SubmissionsResponse>, callback: () -> Unit) {
         api.getSubmissions(assessmentID)
             .enqueue(object : Callback<List<SubmissionsResponse>> {
                 override fun onResponse(
@@ -160,28 +151,16 @@ object RetrofitClient {
                             submissions.addAll(fetchedSubmissions)
                             callback() // Notify that data is ready
                         } else {
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.fail_load_submissions),
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.fail_load_submissions), context)
                         }
                     } else {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.fail_load_submissions),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.fail_load_submissions), context)
                     }
                 }
 
                 override fun onFailure(call: Call<List<SubmissionsResponse>>, t: Throwable) {
                     t.printStackTrace()
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.server_connect_fail),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
                 }
             })
     }
@@ -195,7 +174,7 @@ object RetrofitClient {
      * This list is used to filter the submissions based on the search query in SubmissionsActivity.
      * @param submissionsRecyclerView The RecyclerView that displays the submissions.
      */
-    fun loadSubmissions(context: Context, assessmentID: Int, submissions: ArrayList<SubmissionsResponse>, filteredSubmissions: ArrayList<SubmissionsResponse>, submissionsRecyclerView: RecyclerView) {
+    fun loadSubmissions(context: Context, rootView: View, assessmentID: Int, submissions: ArrayList<SubmissionsResponse>, filteredSubmissions: ArrayList<SubmissionsResponse>, submissionsRecyclerView: RecyclerView) {
         api.getSubmissions(assessmentID)
             .enqueue(object : Callback<List<SubmissionsResponse>> {
                 override fun onResponse(
@@ -213,21 +192,13 @@ object RetrofitClient {
                             SharedPref.saveBoolean(context,"OFFLINE_MODE",false)
                         }
                     } else {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.fail_load_submissions),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.fail_load_submissions), context)
                         (context as SubmissionsActivity).swipeRefreshLayout.isRefreshing = false
                     }
                 }
                 override fun onFailure(call: Call<List<SubmissionsResponse>>, t: Throwable) {
                     t.printStackTrace()
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.server_connect_fail),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
                 }
             })
     }
@@ -241,34 +212,22 @@ object RetrofitClient {
      * @param submissionStatus The new status of the submission.
      * If the submission status is "Marked", the submission PDF is uploaded to the server.
      */
-    fun updateSubmission(context: Context, submissionID: Int, assessmentID: Int, totalMarks:Int,submissionStatus: String, submissionFolderName: String, markingStyle: String) {
+    fun updateSubmission(context: Context, rootView: View,  submissionID: Int, assessmentID: Int, totalMarks:Int,submissionStatus: String, submissionFolderName: String, markingStyle: String) {
         api.updateSubmission(UpdateSubmissionRequest(submissionID, submissionStatus))
             .enqueue(object : Callback<SingleResponse> {
                 override fun onResponse(call: Call<SingleResponse>, response: Response<SingleResponse>) {
                     if (response.isSuccessful) {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.submission_status_success),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.submission_status_success), context)
                         if (submissionStatus == context.getString(R.string.marked)) {
-                            uploadSubmissionPDF(context,assessmentID,submissionID, totalMarks, submissionFolderName, markingStyle)
+                            uploadSubmissionPDF(context,rootView, assessmentID,submissionID, totalMarks, submissionFolderName, markingStyle)
                         }
                     } else {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.submission_status_fail),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.submission_status_fail), context)
                     }
                 }
                 override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
                     t.printStackTrace()
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.server_connect_fail),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
                 }
             })
     }
@@ -280,7 +239,7 @@ object RetrofitClient {
      * @param submissionID The ID of the submission that will be updated.
      * @param studentNumber The student number of the student that submitted the submission.
      */
-    private fun uploadSubmissionPDF(context: Context, assessmentID: Int, submissionID:Int, totalMarks: Int, submissionFolderName: String, markingStyle: String) {
+    private fun uploadSubmissionPDF(context: Context, rootView: View, assessmentID: Int, submissionID:Int, totalMarks: Int, submissionFolderName: String, markingStyle: String) {
         val pdfFile = FileUtil.getSubmissionFile(assessmentID, submissionID, submissionFolderName)
         if (pdfFile?.exists() == true) {
             val progressDialog = ProgressDialog(context)
@@ -298,22 +257,20 @@ object RetrofitClient {
                     ) {
                         progressDialog.dismiss()
                         if (response.isSuccessful) {
-                            Toast.makeText(context, R.string.upload_succes, Toast.LENGTH_SHORT)
-                                .show()
+                            SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.upload_succes), context)
                         } else {
-                            Toast.makeText(context, R.string.upload_fail, Toast.LENGTH_SHORT).show()
+                            SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.upload_fail), context)
                         }
                     }
 
                     override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
                         progressDialog.dismiss()
                         t.printStackTrace()
-                        Toast.makeText(context, R.string.server_connect_fail, Toast.LENGTH_SHORT)
-                            .show()
+                        SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
                     }
                 })
         }else{
-            Toast.makeText(context, R.string.pdf_not_found, Toast.LENGTH_SHORT).show()
+            SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.pdf_not_found), context)
         }
     }
 
@@ -328,7 +285,7 @@ object RetrofitClient {
      * If the PDF is not successfully downloaded, null is passed to the callback function.
      * Callbacks are used to handle the asynchronous nature of the function.
      */
-    fun downloadSubmissionPDF(context: Context, submissionID: Int, submissionFolderName: String, folderName: String, callback: (String?) -> Unit) {
+    fun downloadSubmissionPDF(context: Context,rootView: View, submissionID: Int, submissionFolderName: String, folderName: String, callback: (String?) -> Unit) {
         val progressDialog = ProgressDialog(context)
         progressDialog.setMessage(context.getString(R.string.download_pdf))
         progressDialog.setCancelable(false) //to ensure that the user cannot cancel the download
@@ -349,6 +306,7 @@ object RetrofitClient {
                             documentsDir.mkdirs()
                         }
                         val path = FileUtil.saveSubmissionPDF(context,byteArray, submissionFolderName, documentsDir)
+                        SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.pdf_downloaded), context)
                         callback(path)
                     } else {
                         callback(null)
@@ -377,7 +335,7 @@ object RetrofitClient {
      * Callbacks are used to handle the asynchronous nature of the function.
      * The function is similar to downloadSubmissionPDF, but is used to download the memo PDF instead of the submission PDF.
      */
-    fun downloadMemoPDF(context: Context,assessmentID: Int, folderName: String, callback: (String?) -> Unit) {
+    fun downloadMemoPDF(context: Context,rootView: View, assessmentID: Int, folderName: String, callback: (String?) -> Unit) {
         val progressDialog = ProgressDialog(context)
         progressDialog.setMessage(context.getString(R.string.download_memo_pdf))
         progressDialog.setCancelable(false) //to ensure that the user cannot cancel the download
@@ -394,6 +352,7 @@ object RetrofitClient {
                             documentsDir.mkdirs()
                         }
                         val path = FileUtil.saveMemoPDF(context,byteArray, assessmentID, documentsDir)
+                        SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.memo_downloaded), context)
                         callback(path) //if path is not null, the callback is called with the path
                     } else {
                         callback(null) //if the response is null, the callback is called with null
@@ -410,18 +369,18 @@ object RetrofitClient {
         })
     }
 
-    fun updateMarkingStyle(context: Context, markerEmail: String, markingStyle: String) {
+    fun updateMarkingStyle(context: Context, rootView: View, markerEmail: String, markingStyle: String) {
         api.updateMarkingStyle(UpdateMarkingStyleRequest(markingStyle,markerEmail)).enqueue(object : Callback<SingleResponse> {
             override fun onResponse(call: Call<SingleResponse>, response: Response<SingleResponse>) {
                 if (response.isSuccessful) {
-                    Toast.makeText(context, R.string.marking_style_updated, Toast.LENGTH_SHORT).show()
+                    SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.marking_style_updated), context)
                 } else {
-                    Toast.makeText(context, R.string.marking_style_update_fail, Toast.LENGTH_SHORT).show()
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.marking_style_update_fail), context)
                 }
             }
             override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
                 t.printStackTrace()
-                Toast.makeText(context, R.string.server_connect_fail, Toast.LENGTH_SHORT).show()
+                SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
             }
         })
     }

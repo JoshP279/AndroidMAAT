@@ -170,4 +170,13 @@
     <string name="email_invalid">Invalid email address</string>
     <string name="marking_style_updated">Marking Style updated successfully!</string>
     <string name="marking_style_update_fail">Failed to update marking style.</string>
+    <string name="no_saved_email">No saved email found</string>
+    <string name="memo_downloaded">Memo downloaded successfully!</string>
+    <string name="pdf_downloaded">Submission PDF downloaded successfully!</string>
+    <string name="button_explainer">What does this button do?</string>
+    <string name="undo_explainer">This is the undo button. Clicking this will undo your last annotation action</string>
+    <string name="redo_explainer">This button will redo any of the last annotations you have removed or undone.</string>
+    <string name="save_explainer">This will save your annotations to the PDF document. Make sure you save before setting the submission as marked!</string>
+    <string name="ink_explainer">This button will activate annotation functionality; first click will allow you to edit the submission, and second will make those edits to the submission.</string>
+    <string name="text_explainer">This button will allow you to type out comments.</string>
 </resources>

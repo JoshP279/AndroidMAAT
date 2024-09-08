@@ -52,7 +52,7 @@
         android:id="@+id/loginBtn"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:text="@string/log_in"
         android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"

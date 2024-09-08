@@ -52,7 +52,7 @@ class ViewAssessmentsFragment : Fragment() {
         }
 
         swipeRefreshLayout.setOnRefreshListener {
-            RetrofitClient.loadAssessments(requireContext(),assessments,filteredAssessments,assessmentsList)
+            RetrofitClient.loadAssessments(requireContext(),requireView(), assessments,filteredAssessments,assessmentsList)
             swipeRefreshLayout.isRefreshing = false
         }
         setUpRecyclerView()
@@ -78,13 +78,13 @@ class ViewAssessmentsFragment : Fragment() {
      */
     private fun setUpRecyclerView() {
         assessmentsList.layoutManager = GridLayoutManager(requireContext(), 2)
-        adapter = AssessmentsAdapter(filteredAssessments, requireContext())
+        adapter = AssessmentsAdapter(filteredAssessments, requireContext(), requireView())
         assessmentsList.adapter = adapter
         if (SharedPref.getBoolean(requireContext(), "OFFLINE_MODE", false)) {
             loadOfflineAssessments()
         }
         else{
-            RetrofitClient.loadAssessments(requireContext(),assessments,filteredAssessments,assessmentsList)
+            RetrofitClient.loadAssessments(requireContext(),requireView(),assessments,filteredAssessments,assessmentsList)
         }
         assessmentsList.addItemDecoration(EqualSpaceItemDecoration(10))
         (assessmentsList.adapter as AssessmentsAdapter).setOnItemClickListener(object :
