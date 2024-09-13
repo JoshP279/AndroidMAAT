@@ -116,15 +116,14 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         nextSubmissionButton.setOnClickListener(submissionClickListener);
         prevSubmissionButton.setOnClickListener(submissionClickListener);
         keyboardButton.setOnClickListener(textClickListener);
-        prevSubmissionButton.setEnabled(currentPos>0 && currentPos < filteredSubmissions.size());
-        nextSubmissionButton.setEnabled(currentPos>=0 && currentPos < filteredSubmissions.size()-1);
+        updatePrevAndNextButtons();
         inkButton.setOnClickListener(inkClickListener);
         undoButton.setOnClickListener(undoClickListener);
         redoButton.setOnClickListener(redoClickListener);
         saveButton.setOnClickListener(saveClickListener);
 //        bookmarkButton.setOnClickListener(bookmarkClickListener);
 //        commentButton.setOnClickListener(commentsClickListener);
-        prevSubmissionButton.setVisibility(currentPos == 0 ? View.INVISIBLE : View.VISIBLE);
+        prevSubmissionButton.setEnabled(currentPos == 0);
         nextSubmissionButton.setVisibility(currentPos == filteredSubmissions.size() - 1 ? View.INVISIBLE : View.VISIBLE);
         setupDivider();
         Intent intent = getIntent();
@@ -204,15 +203,31 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 };
             if (nextPos != -1) {
                 currentPos = nextPos;
-                prevSubmissionButton.setEnabled(currentPos > 0 && currentPos < filteredSubmissions.size());
-                prevSubmissionButton.setVisibility(currentPos == 0 ? View.INVISIBLE : View.VISIBLE);
-                nextSubmissionButton.setEnabled(currentPos >= 0 && currentPos <filteredSubmissions.size() - 1);
-                nextSubmissionButton.setVisibility(currentPos == filteredSubmissions.size() - 1 ? View.INVISIBLE : View.VISIBLE);
+                updatePrevAndNextButtons();
                 SubmissionsResponse submission = filteredSubmissions.get(currentPos);
                 openSubmission(submission);
             }
         }
     };
+
+    private void updatePrevAndNextButtons(){
+        if (currentPos > 0 && currentPos < filteredSubmissions.size()){
+            prevSubmissionButton.setEnabled(true);
+            prevSubmissionButton.setAlpha(1f);
+        }else{
+            prevSubmissionButton.setEnabled(false);
+            prevSubmissionButton.setAlpha(0.5f);
+        }
+
+        if (currentPos >= 0 && currentPos <filteredSubmissions.size() - 1){
+            nextSubmissionButton.setEnabled(true);
+            nextSubmissionButton.setAlpha(1f);
+        }
+        else{
+            nextSubmissionButton.setEnabled(false);
+            nextSubmissionButton.setAlpha(0.5f);
+        }
+    }
     /**
      * openSubmission is used to open the submission and memo for the current student.
      * @param submission - the current submission with relevant information
@@ -318,8 +333,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         @Override
         public void onClick(View v) {
             if (!inked){
+                inkButton.setAlpha(0.5f);
                 sPDFView.PDFSetInk(0);
             }else{
+                inkButton.setAlpha(1f);
                 sPDFView.PDFSetInk(1);
             }
             mStatus = Status.ink;
@@ -622,7 +639,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 break;
             case R.id.action_setUnmarked:
                 RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content),submissionID,assessmentID,totalMarks,"Unmarked", submissionFolderName, markingStyle);
-            default:
+            case android.R.id.home:
+                handleBackPressed();
+                return true;
+                default:
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -680,26 +700,37 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      * If the PDF has been modified and cannot be saved, the user is prompted to save the PDF.
      * If the PDF has not been modified, the activity is finished.
      */
+
     @Override
     public void onBackPressed() {
+        // Call the custom back press handling method
+        if (!handleBackPressed()) {
+            // If no action was taken (no dialog shown), call the super method
+            super.onBackPressed();
+        }
+    }
+
+    private boolean handleBackPressed() {
         if (m_modified && mPDFDoc.CanSave()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.notification_label);
             builder.setMessage(R.string.notification_save_label);
             builder.setPositiveButton(R.string.button_positive_label, (dialog, which) -> {
-                if (sPDFView.PDFCanSave())
+                if (sPDFView.PDFCanSave()) {
                     sPDFView.PDFSave();
+                }
                 dialog.dismiss();
                 finish();
             });
-            builder.setNegativeButton(R.string.button_negative_label, ((dialog, which) -> {
+            builder.setNegativeButton(R.string.button_negative_label, (dialog, which) -> {
                 dialog.dismiss();
                 finish();
-            }));
-            builder.setNeutralButton(R.string.button_cancel_label, ((dialog, which) -> dialog.dismiss()));
+            });
+            builder.setNeutralButton(R.string.button_cancel_label, (dialog, which) -> dialog.dismiss());
             builder.create().show();
-        } else
-            super.onBackPressed();
+            return true;
+        }
+        return false;
     }
 
     /**
