@@ -16,6 +16,7 @@ import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SingleResponse
 import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.dataclasses.UpdateMarkingStyleRequest
+import com.radaee.dataclasses.UpdateSubmissionMarkRequest
 import com.radaee.dataclasses.UpdateSubmissionRequest
 import com.radaee.pdfmaster.R
 import okhttp3.MediaType
@@ -36,7 +37,7 @@ import java.io.File
  * The dataclasses are used to interpret the JSON Files into Kotlin objects, meaning they are CASE SENSITIVE.
  * So each data class value has to match the JSON key exactly, otherwise it will not be interpreted correctly.
  */
-object RetrofitClient {
+object RetrofitClient{
     /**
      * The base URL of the server.
      * Note that the IP address is hardcoded, so the server must be running on the same IP address as any clients
@@ -212,7 +213,7 @@ object RetrofitClient {
      * @param submissionStatus The new status of the submission.
      * If the submission status is "Marked", the submission PDF is uploaded to the server.
      */
-    fun updateSubmission(context: Context, rootView: View,  submissionID: Int, assessmentID: Int, totalMarks:Int,submissionStatus: String, submissionFolderName: String, markingStyle: String) {
+    fun updateSubmission(context: Context, rootView: View, submissionID: Int, assessmentID: Int, totalMarks:Int,submissionStatus: String, submissionFolderName: String, markingStyle: String) {
         api.updateSubmission(UpdateSubmissionRequest(submissionID, submissionStatus))
             .enqueue(object : Callback<SingleResponse> {
                 override fun onResponse(call: Call<SingleResponse>, response: Response<SingleResponse>) {
@@ -260,6 +261,7 @@ object RetrofitClient {
                             SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.upload_succes), context)
                         } else {
                             SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.upload_fail), context)
+                            updateSubmission(context, rootView, submissionID, assessmentID, totalMarks, context.getString(R.string.in_progress), submissionFolderName, markingStyle) //if the upload fails, the submission status is set to in progress
                         }
                     }
 
@@ -285,19 +287,21 @@ object RetrofitClient {
      * If the PDF is not successfully downloaded, null is passed to the callback function.
      * Callbacks are used to handle the asynchronous nature of the function.
      */
-    fun downloadSubmissionPDF(context: Context,rootView: View, submissionID: Int, submissionFolderName: String, folderName: String, callback: (String?) -> Unit) {
+    fun downloadSubmissionPDF(context: Context,rootView: View, submissionID: Int, submissionFolderName: String, folderName: String, showProgressDialog: Boolean,  callback: (String?) -> Unit) {
         val progressDialog = ProgressDialog(context)
-        progressDialog.setMessage(context.getString(R.string.download_pdf))
-        progressDialog.setCancelable(false) //to ensure that the user cannot cancel the download
-        progressDialog.show()
+        if (showProgressDialog){
+            progressDialog.setMessage(context.getString(R.string.download_pdf))
+            progressDialog.setCancelable(false) //to ensure that the user cannot cancel the download
+            progressDialog.show()
+        }
         api.getSubmissionPDF(submissionID).enqueue(object : Callback<PDFResponse> {
             override fun onResponse(call: Call<PDFResponse>, response: Response<PDFResponse>) {
-                progressDialog.dismiss()
+                if (showProgressDialog) progressDialog.dismiss()
                 if (response.isSuccessful) {
                     val resp = response.body()
                     if (resp != null) {
                         val byteArray = resp.pdfData.data.map { it.toByte() }.toByteArray()
-                        val documentsDir = java.io.File(
+                        val documentsDir = File(
                             Environment.getExternalStoragePublicDirectory(
                                 Environment.DIRECTORY_DOCUMENTS
                             ), folderName
@@ -306,7 +310,7 @@ object RetrofitClient {
                             documentsDir.mkdirs()
                         }
                         val path = FileUtil.saveSubmissionPDF(context,byteArray, submissionFolderName, documentsDir)
-                        SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.pdf_downloaded), context)
+                        if (showProgressDialog) SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.pdf_downloaded), context)
                         callback(path)
                     } else {
                         callback(null)
@@ -317,7 +321,7 @@ object RetrofitClient {
             }
 
             override fun onFailure(call: Call<PDFResponse>, t: Throwable) {
-                progressDialog.dismiss()
+                if (showProgressDialog) progressDialog.dismiss()
                 t.printStackTrace()
                 callback(null)
             }
@@ -325,7 +329,7 @@ object RetrofitClient {
     }
 
     /**
-     * This function is used to download the memo PDF from the server.
+     * This function is used to `download` the memo PDF from the server.
      * @param context The context of the activity or fragment that is calling the function (usually @SubmissionsActivity).
      * @param assessmentID The ID of the assessment that the memo belongs to.
      * @param folderName The name of the folder that the PDF will be saved to.
@@ -335,14 +339,17 @@ object RetrofitClient {
      * Callbacks are used to handle the asynchronous nature of the function.
      * The function is similar to downloadSubmissionPDF, but is used to download the memo PDF instead of the submission PDF.
      */
-    fun downloadMemoPDF(context: Context,rootView: View, assessmentID: Int, folderName: String, callback: (String?) -> Unit) {
+    fun downloadMemoPDF(context: Context,rootView: View, assessmentID: Int, folderName: String, showProgressDialog: Boolean,  callback: (String?) -> Unit) {
         val progressDialog = ProgressDialog(context)
-        progressDialog.setMessage(context.getString(R.string.download_memo_pdf))
-        progressDialog.setCancelable(false) //to ensure that the user cannot cancel the download
-        progressDialog.show()
+        if (showProgressDialog)
+        {
+            progressDialog.setMessage(context.getString(R.string.download_memo_pdf))
+            progressDialog.setCancelable(false) //to ensure that the user cannot cancel the download
+            progressDialog.show()
+        }
         api.getMemoPDF(assessmentID).enqueue(object : Callback<PDFResponse> {
             override fun onResponse(call: Call<PDFResponse>, response: Response<PDFResponse>) {
-                progressDialog.dismiss()
+                if (showProgressDialog) progressDialog.dismiss()
                 if (response.isSuccessful) {
                     val resp = response.body()
                     if (resp != null) {
@@ -352,7 +359,7 @@ object RetrofitClient {
                             documentsDir.mkdirs()
                         }
                         val path = FileUtil.saveMemoPDF(context,byteArray, assessmentID, documentsDir)
-                        SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.memo_downloaded), context)
+                        if (showProgressDialog) SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.memo_downloaded), context)
                         callback(path) //if path is not null, the callback is called with the path
                     } else {
                         callback(null) //if the response is null, the callback is called with null
@@ -362,7 +369,7 @@ object RetrofitClient {
                 }
             }
             override fun onFailure(call: Call<PDFResponse>, t: Throwable) {
-                progressDialog.dismiss()
+                if (showProgressDialog) progressDialog.dismiss()
                 t.printStackTrace()
                 callback(null) //if the request fails, the callback is called with null
             }
@@ -376,6 +383,22 @@ object RetrofitClient {
                     SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.marking_style_updated), context)
                 } else {
                     SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.marking_style_update_fail), context)
+                }
+            }
+            override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
+                t.printStackTrace()
+                SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
+            }
+        })
+    }
+
+    fun updateSubmissionMark(context: Context, rootView: View, submissionID: Int, totalMarks: Number) {
+        api.updateSubmissionMark(UpdateSubmissionMarkRequest(submissionID, totalMarks)).enqueue(object : Callback<SingleResponse> {
+            override fun onResponse(call: Call<SingleResponse>, response: Response<SingleResponse>) {
+                if (response.isSuccessful) {
+                    SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.mark_updated), context)
+                } else {
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.mark_update_fail), context)
                 }
             }
             override fun onFailure(call: Call<SingleResponse>, t: Throwable) {

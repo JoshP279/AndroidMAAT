@@ -181,4 +181,9 @@
     <string name="text_explainer">This button will allow you to type out comments.</string>
     <string name="pdf_reader_help_header">Assess Submissions</string>
     <string name="pdfreader_help_text">This activity allows you to assess submissions. Try long pressing each of the buttons in the stylus bar if you are unsure of what they do.</string>
+    <string name="updating_submission">Updating Submission Status...</string>
+    <string name="pdf_success_download">Submissions and Memorandum download successfully</string>
+    <string name="edit_mark">Edit Mark</string>
+    <string name="mark_updated">Successfully edited submission mark</string>
+    <string name="mark_update_fail">Failed to edit submission mark</string>
 </resources>

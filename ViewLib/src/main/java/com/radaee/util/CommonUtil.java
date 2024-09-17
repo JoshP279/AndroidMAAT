@@ -294,9 +294,19 @@ public class CommonUtil {
         }
     }
     //josh code
-    public static void showBothPDFOutlines(final IPDFLayoutView mPdfLayoutView, final IPDFLayoutView sPdfLayoutView, Context mContext) {
-        if (mPdfLayoutView.PDFGetDoc().GetOutlines() == null || sPdfLayoutView.PDFGetDoc().GetOutlines() == null) {
+    public static void showBothPDFOutlines(final IPDFLayoutView sPdfLayoutView, final IPDFLayoutView mPdfLayoutView, Context mContext) {
+        if (sPdfLayoutView.PDFGetDoc().GetOutlines() == null && mPdfLayoutView.PDFGetDoc().GetOutlines() == null) {
             Toast.makeText(mContext, R.string.no_pdf_outlines, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (sPdfLayoutView.PDFGetDoc().GetOutlines() == null) {
+            Toast.makeText(mContext, R.string.no_spdf_outlines, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (mPdfLayoutView.PDFGetDoc().GetOutlines() == null) {
+            Toast.makeText(mContext, R.string.no_mpdf_outlines, Toast.LENGTH_SHORT).show();
             return;
         }
 

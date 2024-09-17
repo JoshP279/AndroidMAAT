@@ -154,4 +154,6 @@
 
     <string name="text_copy_hint">Copied following text to clipboard: </string>
     <string name="text_add_annot_failed_hint">add annotation failed!</string>
+    <string name="no_spdf_outlines">Submission PDF does not contain outlines</string>
+    <string name="no_mpdf_outlines">Memorandum PDF does not contain outlines</string>
 </resources>

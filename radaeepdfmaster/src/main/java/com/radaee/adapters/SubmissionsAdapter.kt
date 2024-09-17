@@ -1,19 +1,29 @@
 package com.radaee.adapters
 
+import android.app.AlertDialog
 import android.content.Context
+import android.text.Editable
+import android.text.InputType
+import android.text.TextWatcher
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.activities.SubmissionsActivity
 import com.radaee.dataclasses.SubmissionsResponse
+import com.radaee.objects.RegexUtils
 import com.radaee.objects.RetrofitClient
 import com.radaee.pdfmaster.R
 
@@ -25,7 +35,6 @@ import com.radaee.pdfmaster.R
  */
 class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private val context: Context, private val rootView: View, private val totalMarks: Int, private val markingStyle: String) : RecyclerView.Adapter<SubmissionsAdapter.ViewHolder>()  {
     private var listener: OnItemClickListener? = null
-    private var submissionUpdateListener: SubmissionUpdateListener? = null
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
@@ -33,20 +42,6 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
         val view =
             LayoutInflater.from(parent.context).inflate(R.layout.cardview_submission, parent, false)
         return ViewHolder(view)
-    }
-    /**
-     * Interface for the listener that listens for submission updates
-     */
-    interface SubmissionUpdateListener {
-        fun onSubmissionUpdated()
-    }
-
-    /**
-     * Sets the listener for submission updates
-     * @param listener listener for submission updates
-     */
-    fun setSubmissionUpdateListener(listener: SubmissionUpdateListener) {
-        this.submissionUpdateListener = listener
     }
     override fun getItemCount() = mList.size
 
@@ -56,7 +51,7 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
         holder.submissionsNameTextView.text = item.studentName
         holder.submissionsStudentNumberTextView.text = item.studentNumber
         holder.statusTextView.text = item.submissionStatus
-        updateStatusImageAndText(holder.statusImageView,holder.statusTextView,item.submissionStatus)
+        updateStatusImageAndText(holder.statusImageView,holder.statusTextView,item.submissionStatus, holder.submissionMark, item.submissionMark)
         holder.overflowMenu.setOnClickListener { showPopupMenu(holder.overflowMenu, position)}
         holder.bind(item)
     }
@@ -93,10 +88,9 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
      * @param studentNumber student number
      * @param submissionStatus submission status to update (marked, unmarked, in progress)
      */
-    private fun updateSubmission(submissionID: Int, assessmentID:Int, studentNumber: String, submissionStatus: String, submissionFolderName: String) {
+    private fun updateSubmission(submissionID: Int, assessmentID:Int, submissionStatus: String, submissionFolderName: String) {
         if (context is SubmissionsActivity) {
             RetrofitClient.updateSubmission(context, rootView, submissionID,assessmentID,totalMarks,submissionStatus, submissionFolderName, markingStyle)
-            submissionUpdateListener?.onSubmissionUpdated()
         }
     }
     /**
@@ -104,19 +98,19 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
      * @param position position of the card view
      */
     inner class MyMenuItemClickListener(position: Int) : PopupMenu.OnMenuItemClickListener {
-        private val cur = mList[position]
+        private var cur = mList[position]
         override fun onMenuItemClick(item: MenuItem): Boolean {
             return when (item.itemId) {
                 R.id.action_setMarked -> {
-                    updateSubmission(cur.submissionID, cur.assessmentID,cur.studentNumber,context.getString(R.string.marked), cur.submissionFolderName)
+                    updateSubmission(cur.submissionID, cur.assessmentID,context.getString(R.string.marked), cur.submissionFolderName)
                     true
                 }
                 R.id.action_setUnmarked-> {
-                    updateSubmission(cur.submissionID,cur.assessmentID,cur.studentNumber, context.getString(R.string.unmarked), cur.submissionFolderName)
+                    updateSubmission(cur.submissionID,cur.assessmentID, context.getString(R.string.unmarked), cur.submissionFolderName)
                     true
                 }
                 R.id.action_setInProgress-> {
-                    updateSubmission(cur.submissionID, cur.assessmentID,cur.studentNumber,context.getString(R.string.in_progress), cur.submissionFolderName)
+                    updateSubmission(cur.submissionID, cur.assessmentID,context.getString(R.string.in_progress), cur.submissionFolderName)
                     true
                 }
                 else -> false
@@ -137,12 +131,101 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
         val overflowMenu: ImageView = itemView.findViewById(R.id.overflowMenu)
         val statusTextView: TextView = itemView.findViewById(R.id.submissionsStatusTextView)
         val statusImageView: ImageView = itemView.findViewById(R.id.statusImageView)
+        val submissionMark: TextView = itemView.findViewById(R.id.submissionMarkEditText)
+        init {
+            submissionMark.setOnClickListener {
+                showMarkInputDialog(adapterPosition)
+            }
+        }
         fun bind(submissionsResponse: SubmissionsResponse){
             itemView.setOnClickListener{
                 listener?.onItemClick(adapterPosition)
             }
         }
+        private fun showMarkInputDialog(position: Int) {
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(R.string.edit_mark)
+
+            val layout = LinearLayout(context)
+            layout.orientation = LinearLayout.VERTICAL
+            layout.setPadding(50, 40, 50, 10)
+
+            val input = EditText(context)
+            input.hint = "e.g. 85"
+            input.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+            input.setText(submissionMark.text.toString().replace("%", ""))
+
+            layout.addView(input)
+
+            builder.setView(layout)
+
+            builder.setPositiveButton(R.string.confirm) { dialog, _ ->
+                val newMark = input.text.toString().trim()
+
+                println("User input mark: $newMark")
+
+                val mark = newMark.toDoubleOrNull()
+
+                if (!(newMark.isEmpty() || mark == null || mark < 0.0 || mark > 100.0)) {
+                    submissionMark.setText("$newMark%")
+                    updateSubmissionMarkInBackend(mark, position)
+                }
+            }
+
+            builder.setNegativeButton(R.string.text_cancel_label) { dialog, _ ->
+                dialog.cancel()
+            }
+
+            val dialog = builder.create()
+            dialog.show()
+
+            val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            positiveButton.isEnabled = false
+
+            input.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    val newMark = s.toString()
+
+                    if (RegexUtils.isValidMark(newMark)) {
+                        positiveButton.isEnabled = true
+                        input.error = null
+                    } else {
+                        positiveButton.isEnabled = false
+                        input.error = "Invalid mark. Please enter a valid number between 0 and 100."
+                    }
+                }
+
+                override fun afterTextChanged(s: Editable?) {}
+            })
+
+            positiveButton.setOnClickListener {
+                val newMark = input.text.toString()
+                if (RegexUtils.isValidMark(newMark)) {
+                    submissionMark.setText("$newMark%")
+                    updateSubmissionMarkInBackend(newMark.toDouble(), position)
+                    dialog.dismiss()
+                }
+            }
+
+            input.requestFocus()
+            input.postDelayed({
+                val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT)
+            }, 200)
+        }
+
+
+        private fun updateSubmissionMarkInBackend(newMark: Double, position: Int) {
+            val submission = mList[position]
+            submission.submissionMark = newMark
+            Log.d("SubmissionAdapter", "Updating mark for submission ${submission.submissionID} to $newMark")
+            RetrofitClient.updateSubmissionMark(context, rootView, submission.submissionID, newMark)
+            notifyItemChanged(position)
+        }
     }
+
     /**
      * Interface for the listener that listens for item clicks
      */
@@ -161,15 +244,18 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
      * @param status status of the submission
      * This function updates the status image and text based on the submission status, not the database submission status itself, that is done in the @updateSubmission function
      */
-    private fun updateStatusImageAndText(imageView: ImageView, textView: TextView, status: String){
+    private fun updateStatusImageAndText(imageView: ImageView, statusTextView: TextView, status: String, markTextView: TextView, submissionMark: Number){
         when(status){
             context.getString(R.string.marked) -> {
                 imageView.setImageResource(R.drawable.tick)
-                textView.setTextColor(ContextCompat.getColor(context, R.color.green))
+                statusTextView.setTextColor(ContextCompat.getColor(context, R.color.green))
+                markTextView.visibility = View.VISIBLE
+                markTextView.setText(submissionMark.toString() + "%")
             }
             context.getString(R.string.unmarked) -> {
                 imageView.setImageResource(R.drawable.unmarked)
-                textView.setTextColor(ContextCompat.getColor(context, R.color.red))
+                statusTextView.setTextColor(ContextCompat.getColor(context, R.color.red))
+                markTextView.visibility = View.INVISIBLE
             }
             context.getString(R.string.in_progress) -> {
                 imageView.setImageResource(R.drawable.inprogress)
@@ -180,7 +266,8 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
                 } else {
                     typedValue.data
                 }
-                textView.setTextColor(ContextCompat.getColor(context, colorResId))
+                statusTextView.setTextColor(ContextCompat.getColor(context, colorResId))
+                markTextView.visibility = View.INVISIBLE
             }
         }
     }

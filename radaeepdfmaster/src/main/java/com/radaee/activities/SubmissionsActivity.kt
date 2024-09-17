@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import android.widget.AdapterView
@@ -33,7 +34,7 @@ import java.io.File
  * This activity displays the submissions for a particular assessment.
  * When a submission is clicked, the user is taken to the PDFReaderActivity where they can view the submission and memo PDFs.
  */
-class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUpdateListener{
+class SubmissionsActivity : AppCompatActivity(){
     /**
      * The companion object contains the filtered submissions and the current position of the submission clicked.
      * This is used to ensure that the correct submission is opened in the PDFReaderActivity.
@@ -163,7 +164,6 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         submissionsRecyclerView.layoutManager = LinearLayoutManager(applicationContext)
         adapter = SubmissionsAdapter(filteredSubmissions, this, findViewById(android.R.id.content), totalMarks, markingStyle)
         submissionsRecyclerView.adapter = adapter
-        adapter.setSubmissionUpdateListener(this)
         if (SharedPref.getBoolean(this, "OFFLINE_MODE", true)) {
             loadOfflineSubmissions()
         }
@@ -198,10 +198,11 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
                         submissionID = studentInfo[0].toInt(),
                         assessmentID = assessmentID,
                         studentNumber = studentNumber,
+                        submissionMark = 0,
                         studentName = studentName,
                         studentSurname = studentSurname,
                         submissionStatus = getString(R.string.unmarked),
-                        submissionFolderName = fileName.substringAfter("_")
+                        submissionFolderName = fileName.substringAfter("_").removeSuffix(".pdf"),
                     )
                     submissions.add(submission)
                 }
@@ -225,15 +226,19 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         val submission = filteredSubmissions[position]
         val folderName = assessmentID.toString() + "_" + moduleCode + "_" + assessmentName
         val submissionFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
-        val submissionFileName = submission.submissionID.toString() + "_" + submission.submissionFolderName
+        var submissionFileName = submission.submissionID.toString() + "_" + submission.submissionFolderName
         val memoFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), folderName)
         val memoName = "memo_${assessmentID}.pdf"
-        val sFile = File(submissionFile, submissionFileName)
+        if (!submissionFile.name.contains(".pdf")) {
+            submissionFileName = "$submissionFileName.pdf"
+            Log.e("SubmissionsActivity", submissionFileName)
+        }
+        val sFile: File = File(submissionFile, submissionFileName)
         val mFile = File(memoFile, memoName)
         if (FileUtil.checkSubmissionExists(submissionFile, submissionFileName, submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
             initPDFReaderIntent(sFile.path,mFile.path, submission.studentNumber, submission.submissionID, position)
         }else if (!FileUtil.checkSubmissionExists(submissionFile, submissionFileName,submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
-            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,findViewById(android.R.id.content), submission.submissionID, submissionFileName, folderName) { path ->
+            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,findViewById(android.R.id.content), submission.submissionID, submissionFileName, folderName, true) { path ->
                 if (path != null) {
                     initPDFReaderIntent(path, mFile.path, submission.studentNumber, submission.submissionID, position)
                 } else {
@@ -241,7 +246,7 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
                 }
             }
         }else if (FileUtil.checkSubmissionExists(submissionFile, submissionFileName,  submission.studentNumber) && !FileUtil.checkMemoExists(memoFile,assessmentID)){
-            RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,findViewById(android.R.id.content), assessmentID, folderName) {path ->
+            RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,findViewById(android.R.id.content), assessmentID, folderName, true) {path ->
                 if (path != null) {
                     initPDFReaderIntent(sFile.path, path, submission.studentNumber, submission.submissionID, position)
                 } else {
@@ -249,8 +254,8 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
                 }
             }
         }else{
-            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,findViewById(android.R.id.content), submission.submissionID, submissionFileName, folderName) { sPath ->
-                RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,findViewById(android.R.id.content), assessmentID, folderName) {mPath ->
+            RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,findViewById(android.R.id.content), submission.submissionID, submissionFileName, folderName, true) { sPath ->
+                RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,findViewById(android.R.id.content), assessmentID, folderName, true) {mPath ->
                     if (sPath != null && mPath != null) {
                         initPDFReaderIntent(sPath, mPath, submission.studentNumber, submission.submissionID, position)
                     } else {
@@ -266,6 +271,8 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
      */
     private fun initPDFReaderIntent(sPath:String,mPath: String,studentNumber: String, submissionID: Int, position: Int){
         //Note that these Document objects are custom objects, used to open PDFs with the RadaeePDFSDK.
+
+        Log.e("SubmissionsActivity", sPath)
         submissionPDF = Document()
         memoPDF = Document()
         val err1: Int = submissionPDF!!.Open(sPath, null)
@@ -332,17 +339,5 @@ class SubmissionsActivity : AppCompatActivity(), SubmissionsAdapter.SubmissionUp
         memoPDF?.let{ it.Close() }
         Global.RemoveTmp()
         super.onDestroy()
-    }
-
-    /**
-     * This function is called when the submission is updated.
-     * An updated submission list is loaded from the server.
-     * Note that there is a delay of 1 second before the updated list is loaded, which is artificial in nature. It aims to ensure that the user can see that there submission status has changed.
-     */
-    override fun onSubmissionUpdated() {
-        Handler(Looper.getMainLooper()).postDelayed({
-            RetrofitClient.loadSubmissions(this, findViewById(android.R.id.content), assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
-            swipeRefreshLayout.isRefreshing = false
-        }, 1000)
     }
 }

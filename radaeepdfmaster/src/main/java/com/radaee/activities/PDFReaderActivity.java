@@ -3,6 +3,8 @@ package com.radaee.activities;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -150,8 +153,22 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             mFilePath = mPDFDoc.getDocPath();
         }
         InitLongClickListeners();
+        updatePrevAndNextButtons();
+        UpdateImageButtons();
     }
 
+    private void UpdateImageButtons() {
+        if (sPDFView.PDFCanUndo()){
+            undoButton.setAlpha(1f);
+        }else{
+            undoButton.setAlpha(0.2f);
+        }
+        if (sPDFView.PDFCanRedo()){
+            redoButton.setAlpha(1f);
+        }else{
+            redoButton.setAlpha(0.2f);
+        }
+    }
     private void InitLongClickListeners() {
         undoButton.setOnLongClickListener(v -> {
             showAlertDialog(getString(R.string.undo_explainer));
@@ -260,11 +277,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      */
     private void checkAndDownloadPDFs(File submissionFile, File memoFile, String folderName, File sFile, File mFile, SubmissionsResponse submission) {
         String submissionName = submission.getSubmissionID() + "_" + submission.getSubmissionFolderName();
-        Log.e("check", submissionName);
         if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName, submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
             initPDFReader(sFile.getPath(), mFile.getPath());
         } else if (!FileUtil.INSTANCE.checkSubmissionExists(submissionFile, submissionName,submission.getStudentNumber()) && FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
-            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, findViewById(android.R.id.content), submission.getSubmissionID(), submissionName, folderName, path -> {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, findViewById(android.R.id.content), submission.getSubmissionID(), submissionName, folderName, true, path -> {
                 if (path != null) {
                     initPDFReader(path, mFile.getPath());
                 } else {
@@ -273,7 +289,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 return null;
             });
         } else if (FileUtil.INSTANCE.checkSubmissionExists(submissionFile,submissionName, submission.getStudentNumber()) && !FileUtil.INSTANCE.checkMemoExists(memoFile, assessmentID)) {
-            RetrofitClient.INSTANCE.downloadMemoPDF(this, findViewById(android.R.id.content), assessmentID, folderName, path -> {
+            RetrofitClient.INSTANCE.downloadMemoPDF(this, findViewById(android.R.id.content), assessmentID, folderName, true, path -> {
                 if (path != null) {
                     initPDFReader(sFile.getPath(), path);
                 } else {
@@ -282,9 +298,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 return null;
             });
         } else {
-            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, findViewById(android.R.id.content), submission.getSubmissionID(), submissionName, folderName, sPath -> {
+            RetrofitClient.INSTANCE.downloadSubmissionPDF(this, findViewById(android.R.id.content), submission.getSubmissionID(), submissionName, folderName, true, sPath -> {
                 if (sPath != null) {
-                    RetrofitClient.INSTANCE.downloadMemoPDF(this,findViewById(android.R.id.content), assessmentID, folderName, mPath -> {
+                    RetrofitClient.INSTANCE.downloadMemoPDF(this,findViewById(android.R.id.content), assessmentID, folderName, true,  mPath -> {
                         if (mPath != null) {
                             initPDFReader(sPath, mPath);
                         } else {
@@ -311,6 +327,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         sPDFDoc.Close();
         sPDFDoc = new Document();
 //        mPDFDoc = new Document();
+        if (!sPath.contains(".pdf")){
+            sPath = sPath + ".pdf";
+        }
         int err1 = sPDFDoc.Open(sPath, null);
 //        int err2 = mPDFDoc.Open(mPath, null);
         if (err1 == 0) {
@@ -333,12 +352,13 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         @Override
         public void onClick(View v) {
             if (!inked){
-                inkButton.setAlpha(0.5f);
+                inkButton.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
                 sPDFView.PDFSetInk(0);
             }else{
-                inkButton.setAlpha(1f);
+                inkButton.clearColorFilter();
                 sPDFView.PDFSetInk(1);
             }
+            UpdateImageButtons();
             mStatus = Status.ink;
             m_modified = true;
             inked = !inked;
@@ -357,6 +377,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             }else{
                 SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.no_more_undo), PDFReaderActivity.this);
             }
+            UpdateImageButtons();
         }
     };
 
@@ -372,6 +393,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             }else{
                 SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.no_more_redo), PDFReaderActivity.this);
             }
+            UpdateImageButtons();
         }
     };
 
@@ -390,8 +412,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 m_modified = false;
                 SnackbarUtil.INSTANCE.showSuccessSnackBar(findViewById(android.R.id.content), getString(R.string.saved_message), PDFReaderActivity.this);
             }else{
+                saveButton.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
                 SnackbarUtil.INSTANCE.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.fail_saved_message), PDFReaderActivity.this);
             }
+            UpdateImageButtons();
         }
     };
 
@@ -426,6 +450,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         @Override
         public void onClick(View v) {
             if (!texted){
+                keyboardButton.setAlpha(0.2f);
                 sPDFView.PDFSetEditbox(0);
             }else{
                 sPDFView.PDFSetEditbox(1);
@@ -483,17 +508,22 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     @Override
     public void OnPDFPageModified(int pageno) {
         m_modified = true;
+        UpdateImageButtons();
     }
 
     @Override
     public void OnPDFPageChanged(int pageno) {
         m_cur_page = pageno;
+        keyboardButton.setAlpha(1f);
+        UpdateImageButtons();
     }
     @Override
     public void OnPDFAnnotTapped(int pno, Page.Annotation annot) {
         if (pno < 0 && annot == null)
         {
             mStatus = Status.none;
+            keyboardButton.setAlpha(1f);
+            UpdateImageButtons();
         }
     }
     @Override
@@ -530,19 +560,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     public void OnPDFPageDisplayed(Canvas canvas, IPDFLayoutView.IVPage vpage){}
     @Override
     public void OnPDFPageRendered(IPDFLayoutView.IVPage vpage) {}
-    public void image_annot_text_box(View v) {
-        sPDFView.PDFSetEditbox(0);
-        mStatus = Status.text_box;
-    }
-    public void image_annot_ink(View v) {
-        sPDFView.PDFSetInk(0);
-        mStatus = Status.ink;
-    }
-    public void image_annot_note(View v) {
-        sPDFView.PDFSetNote(0);
-        mStatus = Status.note;
-    }
-
     /**
      * onResume is overridden to set the PDF documents if they are null.
      */
@@ -635,14 +652,14 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content), submissionID,assessmentID,totalMarks,"In Progress", submissionFolderName, markingStyle);
                 break;
             case R.id.action_setMarked:
-                RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content),submissionID,assessmentID,totalMarks,"Marked", submissionFolderName, markingStyle);
+                RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content), submissionID,assessmentID,totalMarks,"Marked", submissionFolderName, markingStyle);
                 break;
             case R.id.action_setUnmarked:
-                RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content),submissionID,assessmentID,totalMarks,"Unmarked", submissionFolderName, markingStyle);
+                RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content), submissionID,assessmentID,totalMarks,"Unmarked", submissionFolderName, markingStyle);
             case android.R.id.home:
-                handleBackPressed();
-                return true;
-                default:
+                if (handleBackPressed()) {
+                    return true;
+                }
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -703,9 +720,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
 
     @Override
     public void onBackPressed() {
-        // Call the custom back press handling method
         if (!handleBackPressed()) {
-            // If no action was taken (no dialog shown), call the super method
             super.onBackPressed();
         }
     }
@@ -717,16 +732,19 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             builder.setMessage(R.string.notification_save_label);
             builder.setPositiveButton(R.string.button_positive_label, (dialog, which) -> {
                 if (sPDFView.PDFCanSave()) {
+                    sPDFView.PDFSetInk(1);
+                    sPDFView.PDFSetEditbox(1);
                     sPDFView.PDFSave();
                 }
-                dialog.dismiss();
                 finish();
             });
             builder.setNegativeButton(R.string.button_negative_label, (dialog, which) -> {
                 dialog.dismiss();
                 finish();
             });
-            builder.setNeutralButton(R.string.button_cancel_label, (dialog, which) -> dialog.dismiss());
+            builder.setNeutralButton(R.string.button_cancel_label, (dialog, which) -> {
+                dialog.dismiss();
+            });
             builder.create().show();
             return true;
         }

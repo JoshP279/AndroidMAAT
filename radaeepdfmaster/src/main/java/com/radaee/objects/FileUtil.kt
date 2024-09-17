@@ -2,6 +2,7 @@ package com.radaee.objects
 
 import android.content.Context
 import android.os.Environment
+import android.util.Log
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -20,7 +21,7 @@ object FileUtil {
      */
     fun saveSubmissionPDF(context: Context, pdfData: ByteArray,submissionFolderName: String, documentsDir: File): String? {
         return try {
-            val file = File(documentsDir, submissionFolderName)
+            val file = File(documentsDir, "$submissionFolderName.pdf")
             val fos = FileOutputStream(file)
             fos.write(pdfData)
             fos.close()
@@ -60,7 +61,8 @@ object FileUtil {
      * @return true if the file exists, false otherwise
      */
     fun checkSubmissionExists(folderPath: File, fileName: String, studentNumber: String): Boolean {
-        val file = File(folderPath, fileName)
+        val file: File = if (!fileName.contains(".pdf")) File(folderPath, "$fileName.pdf")
+        else File(folderPath, fileName)
         return file.exists()
     }
 
@@ -91,7 +93,8 @@ object FileUtil {
 
         return if (assessmentFolder != null) {
             // The file should be named as submissionID_submissionFolderName
-            val expectedFileName = "${submissionID}_$submissionFolderName"
+            val expectedFileName = "${submissionID}_$submissionFolderName.pdf"
+            Log.e("FileUtil", expectedFileName)
             val submissionFile = assessmentFolder.listFiles()?.find {
                 it.name == expectedFileName
             }

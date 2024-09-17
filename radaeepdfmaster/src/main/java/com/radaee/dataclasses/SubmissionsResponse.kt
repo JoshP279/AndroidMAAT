@@ -13,6 +13,7 @@ data class SubmissionsResponse(
     val submissionID: Int,
     val assessmentID: Int,
     val studentNumber: String,
+    var submissionMark: Number,
     val studentName: String,
     val studentSurname:String,
     val submissionStatus: String,

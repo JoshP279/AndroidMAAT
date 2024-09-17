@@ -88,7 +88,7 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
                         val folderName =
                             cur.assessmentID.toString() + "_" + cur.moduleCode + "_" + cur.assessmentName
                         var remainingDownloads = submissions.size + 1 // +1 for the memo
-                        RetrofitClient.downloadMemoPDF(context, rootView, cur.assessmentID, folderName) { path ->
+                        RetrofitClient.downloadMemoPDF(context, rootView, cur.assessmentID, folderName, false) { path ->
                             if (path == null) {
                                 SnackbarUtil.showErrorSnackBar(
                                     rootView,
@@ -110,7 +110,8 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
                                 rootView,
                                 submission.submissionID,
                                 submissionFileName,
-                                folderName
+                                folderName,
+                                false
                             ) { path ->
                                 if (path == null) {
                                     SnackbarUtil.showErrorSnackBar(
@@ -122,6 +123,11 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
                                 remainingDownloads--
                                 if (remainingDownloads == 0) {
                                     progressDialog.dismiss()
+                                    SnackbarUtil.showSuccessSnackBar(
+                                        rootView,
+                                        context.getString(R.string.pdf_success_download),
+                                        context
+                                    )
                                 }
                             }
                         }

@@ -6,12 +6,14 @@ import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SingleResponse
 import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.dataclasses.UpdateMarkingStyleRequest
+import com.radaee.dataclasses.UpdateSubmissionMarkRequest
 import com.radaee.dataclasses.UpdateSubmissionRequest
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Multipart
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
 import retrofit2.http.Query
@@ -32,7 +34,7 @@ interface API {
     fun login(
         @Query("MarkerEmail") markerEmail: String,
         @Query("Password") password: String
-    ):Call<LogInResponse>
+    ): Call<LogInResponse>
 
     /**
      * Get all assessments for a marker
@@ -106,4 +108,10 @@ interface API {
     fun updateMarkingStyle(
         @Body request: UpdateMarkingStyleRequest
     ): Call<SingleResponse>
+
+    @PUT("/updateSubmissionMark")
+    fun updateSubmissionMark(
+        @Body request: UpdateSubmissionMarkRequest
+    ): Call<SingleResponse>
+
 }
