@@ -2,9 +2,11 @@ package com.radaee.adapters
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.res.Configuration
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -18,13 +20,14 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.TypedArrayUtils.getResourceId
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.activities.SubmissionsActivity
 import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.objects.RegexUtils
 import com.radaee.objects.RetrofitClient
+import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
 
 /**
@@ -49,11 +52,23 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
         val item = mList[position]
         holder.submissionsSurnameTextView.text = item.studentSurname + ", "
         holder.submissionsNameTextView.text = item.studentName
+        holder.submissionsSurnameTextView.apply {
+            isVerticalScrollBarEnabled = true
+            movementMethod = ScrollingMovementMethod()
+        }
         holder.submissionsStudentNumberTextView.text = item.studentNumber
         holder.statusTextView.text = item.submissionStatus
         updateStatusImageAndText(holder.statusImageView,holder.statusTextView,item.submissionStatus, holder.submissionMark, item.submissionMark)
         holder.overflowMenu.setOnClickListener { showPopupMenu(holder.overflowMenu, position)}
         holder.bind(item)
+
+        if (SharedPref.getBoolean(context, "OFFLINE_MODE", false)) {
+            if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                holder.submissionsSurnameTextView.maxWidth = 1000
+            }else{
+                holder.submissionsSurnameTextView.maxWidth = 600
+            }
+        }
     }
 
     /**
@@ -193,7 +208,7 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
                         input.error = null
                     } else {
                         positiveButton.isEnabled = false
-                        input.error = "Invalid mark. Please enter a valid number between 0 and 100."
+                        input.error = context.getString(R.string.invalid_mark)
                     }
                 }
 

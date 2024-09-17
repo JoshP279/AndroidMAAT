@@ -186,4 +186,5 @@
     <string name="edit_mark">Edit Mark</string>
     <string name="mark_updated">Successfully edited submission mark</string>
     <string name="mark_update_fail">Failed to edit submission mark</string>
+    <string name="invalid_mark">Invalid mark. Please enter a valid number between 0 and 100.</string>
 </resources>

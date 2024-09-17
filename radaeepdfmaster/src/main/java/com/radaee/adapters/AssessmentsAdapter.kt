@@ -40,10 +40,6 @@ class AssessmentsAdapter(private val mList: List<AssessmentResponse>, private va
         val item = mList[position]
         holder.moduleCodeTextView.text = item.moduleCode
         holder.assessmentNameTextView.text = item.assessmentName
-        holder.assessmentNameTextView.apply {
-            isVerticalScrollBarEnabled = true
-            movementMethod = ScrollingMovementMethod()
-        }
         holder.assessmentTotalSubmissionsTextView.text = String.format(context.getString(R.string.submissions_marked), item.totalSubmissions)
         holder.assessmentNumMarkedTextView.text =  String.format(item.numMarked.toString() + "/")
         holder.overflowMenu.setOnClickListener { showPopupMenu(holder.overflowMenu, position)}
