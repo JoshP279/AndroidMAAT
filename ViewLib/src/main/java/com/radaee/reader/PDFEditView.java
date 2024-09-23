@@ -937,10 +937,13 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                 m_annot_page = null;
                 m_annot_rect = null;
                 if (m_listener != null) {
-                    if (m_status == STA_ANNOT)
+                    if (m_status == STA_ANNOT) {
+                        Log.e("PDFEditView", "Annotation not found");
                         m_listener.OnPDFAnnotTapped(m_annot_pos.pageno, null);
-                    else
+                    }
+                    else{
                         m_listener.OnPDFBlankTapped(m_annot_pos.pageno);
+                    }
                 }
                 m_annot_pos = null;
                 m_annot_pg.Close();
@@ -2269,20 +2272,30 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
     }
 
     private boolean onTouchAnnot(MotionEvent event) {
-        if (m_status != STA_ANNOT || !PDFCanSave()) return false;
-        if ((Global.g_annot_lock && m_annot.IsLocked()) || (Global.g_annot_readonly && m_annot.IsReadOnly()) ||
-                m_annot.GetType() == 2 ||
-                m_annot.GetType() == 9 ||
-                m_annot.GetType() == 10 ||
-                m_annot.GetType() == 11 ||
-                m_annot.GetType() == 12 ||
-                m_annot.GetType() == 20) {
-            PDFEndAnnot();
+        Log.e("annot", "onTouchAnnot");
+        try{
+            if (m_status != STA_ANNOT || !PDFCanSave()) return false;
+            if ((Global.g_annot_lock && m_annot.IsLocked()) || (Global.g_annot_readonly && m_annot.IsReadOnly()) ||
+                    m_annot.GetType() == 2 ||
+                    m_annot.GetType() == 9 ||
+                    m_annot.GetType() == 10 ||
+                    m_annot.GetType() == 11 ||
+                    m_annot.GetType() == 12 ||
+                    m_annot.GetType() == 20) {
+                PDFEndAnnot();
+                return false;
+            }
+            m_annot_op.onTouch(event);
+            if (m_canvas != null) m_canvas.invalidate();
+            return true;
+        }catch (Exception e){
+            Log.e("annot", "onTouchAnnot error");
+            e.printStackTrace();
             return false;
+        }finally {
+            Log.e("annot", "onTouchAnnot finally");
         }
-        m_annot_op.onTouch(event);
-        if (m_canvas != null) m_canvas.invalidate();
-        return true;
+
     }
 
     private boolean onTouchLine(MotionEvent event) {
@@ -3314,8 +3327,6 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                     m_layout.gl_render(m_annot_page);
                     requestRender();
                     page.Close();
-                    m_ink.ID = numInk;
-                    numInk++;
                     if (m_listener != null)
                         m_listener.OnPDFPageModified(m_annot_page.GetPageNo());
                 }

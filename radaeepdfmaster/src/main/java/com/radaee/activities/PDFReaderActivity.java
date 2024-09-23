@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -39,7 +40,6 @@ import com.radaee.view.IPDFLayoutView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * PDFReaderActivity displays both the submission and the memo side by side.
  * The user can annotate the submission and save the annotations.
@@ -96,6 +96,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private String submissionFolderName;
     private int totalMarks;
     private String markingStyle;
+    private boolean isButtonPressed = false;
+    private boolean isSpenButtonPressed = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,6 +159,23 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         updatePrevAndNextButtons();
         UpdateImageButtons();
     }
+
+    private final View.OnClickListener inkClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (!inked){
+                inkButton.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
+                sPDFView.PDFSetInk(0);
+            }else{
+                inkButton.clearColorFilter();
+                sPDFView.PDFSetInk(1);
+            }
+            UpdateImageButtons();
+            mStatus = Status.ink;
+            m_modified = true;
+            inked = !inked;
+        }
+    };
 
     private void UpdateImageButtons() {
         if (sPDFView.PDFCanUndo()){
@@ -219,6 +239,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                     default -> nextPos;
                 };
             if (nextPos != -1) {
+                OnPDFBlankTapped(m_cur_page); //if an annotation is in focus, remove focus and open next PDF
                 currentPos = nextPos;
                 updatePrevAndNextButtons();
                 SubmissionsResponse submission = filteredSubmissions.get(currentPos);
@@ -251,6 +272,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      * The submission is opened by checking if the submission and memo PDFs exist locally.
      */
     private void openSubmission(SubmissionsResponse submission) {
+        mStatus = Status.none;
         studentNumber = submission.getStudentNumber();
         submissionID = submission.getSubmissionID();
         assessmentID = submission.getAssessmentID();
@@ -323,7 +345,11 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      * @param mPath - the path to the memo PDF
      */
     private void initPDFReader(String sPath, String mPath) {
-//        mPDFDoc.Close();
+//        mPDFDoc.Close();\
+        OnPDFAnnotTapped(-1, null);
+        if (sPDFDoc.GetPage(m_cur_page) != null) {
+            sPDFDoc.GetPage(m_cur_page).Close();
+        }
         sPDFDoc.Close();
         sPDFDoc = new Document();
 //        mPDFDoc = new Document();
@@ -348,22 +374,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
      * PDFSetInk(0) is used to annotate the PDF with ink.
      * PDFSetInk(0) is used to save the annotation to PDF (and go back to scrolling)
      */
-    private final View.OnClickListener inkClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (!inked){
-                inkButton.setColorFilter(Color.GRAY, PorterDuff.Mode.SRC_IN);
-                sPDFView.PDFSetInk(0);
-            }else{
-                inkButton.clearColorFilter();
-                sPDFView.PDFSetInk(1);
-            }
-            UpdateImageButtons();
-            mStatus = Status.ink;
-            m_modified = true;
-            inked = !inked;
-        }
-    };
+
 
     /**
      * undoClickListener is the OnClickListener for the undoButton.
@@ -519,15 +530,19 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     }
     @Override
     public void OnPDFAnnotTapped(int pno, Page.Annotation annot) {
-        if (pno < 0 && annot == null)
-        {
+        Log.e("annot", annot==null?"null":"not null");
+        Log.e("annot", pno+"");
+        if (pno < 0 && annot == null) {
             mStatus = Status.none;
             keyboardButton.setAlpha(1f);
             UpdateImageButtons();
         }
     }
     @Override
-    public void OnPDFBlankTapped(int pageno) {}
+    public void OnPDFBlankTapped(int pageno) {
+        if (mStatus != Status.none)
+            return;
+    }
     @Override
     public void OnPDFSelectEnd(){}
     @Override
@@ -553,7 +568,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     @Override
     public boolean OnPDFDoubleTapped(float x, float y) {return false;}
     @Override
-    public void OnPDFLongPressed(float x, float y) {}
+    public void OnPDFLongPressed(float x, float y) {
+        Toast.makeText(this, "deez", Toast.LENGTH_SHORT).show();
+    }
     @Override
     public void OnPDFSearchFinished(boolean found) {}
     @Override
