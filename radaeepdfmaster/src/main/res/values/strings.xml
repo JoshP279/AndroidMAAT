@@ -132,8 +132,8 @@
     <string name="about_dev_description">This app was developed by Joshua Page under the supervision of Marinda Taljaard. Our goal is to create efficient and user-friendly applications to improve productivity and streamline workflows.</string>
     <string name="contact_us_heading">Contact Us</string>
     <string name="contact_us_description">For support or inquiries, please contact the developer at s224046136@mandela.ac.za.</string>
-    <string name="version_heading">Version</string>
-    <string name="version_description">v1.00</string>
+    <string name="version_heading">Version History</string>
+    <string name="version_description">V1.00-Adriaan Wildervanck\nV2.00-Logan Fleur\nV3.00-Kupelo\nV4.00-Joshua Page</string>
     <string name="theme">Theme</string>
     <string name="marking_style">Marking Style</string>
     <string name="memorandum">Memorandum</string>
@@ -143,7 +143,7 @@
     <string name="fail_saved_message">Document not saved</string>
     <string name="pdf_fail_download">Failed to download PDF</string>
     <string name="pdf_fail_open">Failed to open PDF</string>
-    <string name="download_pdf">Downloading Submission PDF...</string>
+    <string name="download_pdf">Downloading Submission PDF…</string>
     <string name="pdf_fail_save">Failed to save PDF</string>
     <string name="pdf_saved_message">PDF saved as %1$s in %2$s</string>
     <string name="marking_style1">Right Handed Ticks</string>
@@ -154,7 +154,7 @@
     <string name="fail_load_submissions">Failed to load submissions</string>
     <string name="submission_status_success">Submission status updated successfully</string>
     <string name="submission_status_fail">Failed to updated submission status</string>
-    <string name="uploading_pdf">Uploading Submission PDF...</string>
+    <string name="uploading_pdf">Uploading Submission PDF…</string>
     <string name="upload_succes">Successfully uploaded submission</string>
     <string name="upload_fail">Failed to upload submission PDF</string>
     <string name="recent_submissions">Recent Submissions</string>
@@ -165,8 +165,8 @@
     <string name="no_offline_submissions">No offline submissions found</string>
     <string name="pdf_not_found">Submission PDF not found!</string>
     <string name="download_all">Download all submissions</string>
-    <string name="downloading_submissions">Downloading all submissions and memo...</string>
-    <string name="download_memo_pdf">Downloading memo PDF...</string>
+    <string name="downloading_submissions">Downloading all submissions and memo…</string>
+    <string name="download_memo_pdf">Downloading memo PDF…</string>
     <string name="email_invalid">Invalid email address</string>
     <string name="marking_style_updated">Marking Style updated successfully!</string>
     <string name="marking_style_update_fail">Failed to update marking style.</string>
@@ -177,14 +177,17 @@
     <string name="undo_explainer">This is the undo button. Clicking this will undo your last annotation action</string>
     <string name="redo_explainer">This button will redo any of the last annotations you have removed or undone.</string>
     <string name="save_explainer">This will save your annotations to the PDF document. Make sure you save before setting the submission as marked!</string>
-    <string name="ink_explainer">This button will activate annotation functionality; first click will allow you to edit the submission, and second will make those edits to the submission.</string>
+    <string name="ink_explainer">This button activates the annotation mode. The first click allows you to make annotations using a stylus, and the second click finalizes your input and exits the annotation mode.</string>
     <string name="text_explainer">This button will allow you to type out comments.</string>
     <string name="pdf_reader_help_header">Assess Submissions</string>
     <string name="pdfreader_help_text">This activity allows you to assess submissions. Try long pressing each of the buttons in the stylus bar if you are unsure of what they do.</string>
-    <string name="updating_submission">Updating Submission Status...</string>
+    <string name="updating_submission">Updating Submission Status…</string>
     <string name="pdf_success_download">Submissions and Memorandum download successfully</string>
     <string name="edit_mark">Edit Mark</string>
     <string name="mark_updated">Successfully edited submission mark</string>
     <string name="mark_update_fail">Failed to edit submission mark</string>
     <string name="invalid_mark">Invalid mark. Please enter a valid number between 0 and 100.</string>
+    <string name="pdfhelper_message">This section allows you to mark submissions. If you are unsure about any of the actions in the stylus toolbar, simply click and hold on a button to see its function. You can also resize the middle bar to adjust the view between the submission and the memorandum according to your preference.</string>
+    <string name="view_website">View Website</string>
+    <string name="view_website_msg">Are you sure you want to visit the website? (This will open the website in a browser)</string>
 </resources>

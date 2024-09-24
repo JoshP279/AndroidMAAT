@@ -21,11 +21,19 @@ object FileUtil {
      */
     fun saveSubmissionPDF(context: Context, pdfData: ByteArray,submissionFolderName: String, documentsDir: File): String? {
         return try {
-            val file = File(documentsDir, "$submissionFolderName.pdf")
-            val fos = FileOutputStream(file)
-            fos.write(pdfData)
-            fos.close()
-            file.absolutePath
+            if (submissionFolderName.contains(".pdf")) {
+                val file = File(documentsDir, submissionFolderName)
+                val fos = FileOutputStream(file)
+                fos.write(pdfData)
+                fos.close()
+                return file.absolutePath
+            }else{
+                val file = File(documentsDir, "$submissionFolderName.pdf")
+                val fos = FileOutputStream(file)
+                fos.write(pdfData)
+                fos.close()
+                file.absolutePath
+            }
         } catch (e: IOException) {
             e.printStackTrace()
             null

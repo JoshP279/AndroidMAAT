@@ -7,14 +7,14 @@
     android:orientation="horizontal">
 
 
-    <ImageButton
-        android:id="@+id/btn_annot_add"
-        android:layout_width="@dimen/annot_menu_btn_size"
-        android:layout_height="match_parent"
-        android:background="@drawable/bg_btn_menu"
-        android:contentDescription="@string/annot_add"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_add" />
+<!--    <ImageButton-->
+<!--        android:id="@+id/btn_annot_add"-->
+<!--        android:layout_width="@dimen/annot_menu_btn_size"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:background="@drawable/bg_btn_menu"-->
+<!--        android:contentDescription="@string/annot_add"-->
+<!--        android:scaleType="fitXY"-->
+<!--        android:src="@drawable/ic_add" />-->
 
     <ImageButton
         android:id="@+id/btn_annot_remove"

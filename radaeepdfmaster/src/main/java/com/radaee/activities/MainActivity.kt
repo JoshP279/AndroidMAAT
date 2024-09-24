@@ -52,6 +52,22 @@ class MainActivity : AppCompatActivity() {
                     .replace(R.id.content_frame, HelpFragment()).commit()
                 R.id.nav_about -> supportFragmentManager.beginTransaction()
                     .replace(R.id.content_frame, AboutFragment()).commit()
+                R.id.nav_view_website -> {
+                    val alertDialog = AlertDialog.Builder(this@MainActivity)
+                    alertDialog.setTitle(R.string.view_website)
+                    alertDialog.setMessage(R.string.view_website_msg)
+                    alertDialog.setPositiveButton(R.string.confirm) { dialog, which ->
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
+                        intent.data = android.net.Uri.parse("http://10.0.0.107:4200")
+                        startActivity(intent)
+                    }
+
+                    alertDialog.setNegativeButton(R.string.text_cancel_label) { dialog, which ->
+                        dialog.dismiss()
+                    }
+                    alertDialog.create().show()
+                }
+
             }
             drawerLayout.closeDrawers()
             true

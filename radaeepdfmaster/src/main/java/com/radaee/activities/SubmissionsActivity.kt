@@ -236,10 +236,12 @@ class SubmissionsActivity : AppCompatActivity(){
         val sFile: File = File(submissionFile, submissionFileName)
         val mFile = File(memoFile, memoName)
         if (FileUtil.checkSubmissionExists(submissionFile, submissionFileName, submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
+            Log.e("SubmissionsActivity0", sFile.path)
             initPDFReaderIntent(sFile.path,mFile.path, submission.studentNumber, submission.submissionID, position)
         }else if (!FileUtil.checkSubmissionExists(submissionFile, submissionFileName,submission.studentNumber) && FileUtil.checkMemoExists(memoFile,assessmentID)) {
             RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,findViewById(android.R.id.content), submission.submissionID, submissionFileName, folderName, true) { path ->
                 if (path != null) {
+                    Log.e("SubmissionsActivity1", path)
                     initPDFReaderIntent(path, mFile.path, submission.studentNumber, submission.submissionID, position)
                 } else {
                     SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this)
@@ -248,6 +250,7 @@ class SubmissionsActivity : AppCompatActivity(){
         }else if (FileUtil.checkSubmissionExists(submissionFile, submissionFileName,  submission.studentNumber) && !FileUtil.checkMemoExists(memoFile,assessmentID)){
             RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,findViewById(android.R.id.content), assessmentID, folderName, true) {path ->
                 if (path != null) {
+                    Log.e("SubmissionsActivity2", path)
                     initPDFReaderIntent(sFile.path, path, submission.studentNumber, submission.submissionID, position)
                 } else {
                     SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this)
@@ -256,7 +259,8 @@ class SubmissionsActivity : AppCompatActivity(){
         }else{
             RetrofitClient.downloadSubmissionPDF(this@SubmissionsActivity,findViewById(android.R.id.content), submission.submissionID, submissionFileName, folderName, true) { sPath ->
                 RetrofitClient.downloadMemoPDF(this@SubmissionsActivity,findViewById(android.R.id.content), assessmentID, folderName, true) {mPath ->
-                    if (sPath != null && mPath != null) {
+                    if (sPath != null && mPath != null){
+                        Log.e("SubmissionsActivity3", sPath)
                         initPDFReaderIntent(sPath, mPath, submission.studentNumber, submission.submissionID, position)
                     } else {
                         SnackbarUtil.showErrorSnackBar(findViewById(android.R.id.content), getString(R.string.pdf_fail_download), this)
@@ -271,8 +275,6 @@ class SubmissionsActivity : AppCompatActivity(){
      */
     private fun initPDFReaderIntent(sPath:String,mPath: String,studentNumber: String, submissionID: Int, position: Int){
         //Note that these Document objects are custom objects, used to open PDFs with the RadaeePDFSDK.
-
-        Log.e("SubmissionsActivity", sPath)
         submissionPDF = Document()
         memoPDF = Document()
         val err1: Int = submissionPDF!!.Open(sPath, null)

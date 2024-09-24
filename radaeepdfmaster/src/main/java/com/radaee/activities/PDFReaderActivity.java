@@ -1,6 +1,7 @@
 package com.radaee.activities;
 
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,7 +15,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -88,6 +88,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private TextView studentNum;
     private ImageButton nextSubmissionButton;
     private ImageButton prevSubmissionButton;
+    private TextView pdfHelper;
     private String studentNumber;
     private int submissionID;
     private int assessmentID;
@@ -114,6 +115,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         undoButton = findViewById(R.id.undoButton);
         redoButton = findViewById(R.id.redoButton);
         saveButton = findViewById(R.id.saveButton);
+        pdfHelper = findViewById(R.id.pdfHelper);
+        pdfHelper.setOnClickListener(v -> displayHelperDialog());
+
 //        commentButton = findViewById(R.id.commentButton);
 //        bookmarkButton = findViewById(R.id.bookMarkButton);
         keyboardButton = findViewById(R.id.typedAnnotButton);
@@ -176,6 +180,15 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             inked = !inked;
         }
     };
+    private void displayHelperDialog() {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(PDFReaderActivity.this);
+        builder.setTitle(R.string.helperHeading);
+        builder.setMessage(R.string.pdfhelper_message);
+        builder.setPositiveButton(R.string.ok, (dialog, which) -> dialog.dismiss());
+        androidx.appcompat.app.AlertDialog alertDialog = builder.create();
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+    }
 
     private void UpdateImageButtons() {
         if (sPDFView.PDFCanUndo()){
@@ -353,14 +366,16 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         sPDFDoc.Close();
         sPDFDoc = new Document();
 //        mPDFDoc = new Document();
-        if (!sPath.contains(".pdf")){
+        if (!sPath.contains(".pdf")) {
             sPath = sPath + ".pdf";
         }
         int err1 = sPDFDoc.Open(sPath, null);
 //        int err2 = mPDFDoc.Open(mPath, null);
         if (err1 == 0) {
             sPDFView.PDFOpen(sPDFDoc, PDFReaderActivity.this);
-            sPDFView.PDFGotoPage(0);
+            if (m_cur_page >= 0 && m_cur_page <= sPDFView.PDFGetDoc().GetPageCount()) {
+                sPDFView.PDFGotoPage(m_cur_page);
+            }
             sFilePath = sPDFDoc.getDocPath();
 //            mPDFView.PDFOpen(mPDFDoc, PDFReaderActivity.this);
 //            mFilePath = mPDFDoc.getDocPath();
@@ -383,6 +398,12 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private final View.OnClickListener undoClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            if (m_modified){
+                sPDFView.PDFSetInk(1);
+                sPDFView.PDFSetEditbox(1);
+                sPDFView.PDFSetInk(0);
+                UpdateImageButtons();
+            }
             if (sPDFView.PDFCanUndo()){
                 sPDFView.PDFUndo();
             }else{

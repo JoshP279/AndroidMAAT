@@ -139,7 +139,7 @@ class LogInActivity : AppCompatActivity() {
                 requestReadWritePermissions()
             }
         } else {
-            requestReadWritePermissions()
+            requestReadWritePermissions() // For versions below Android 11
         }
     }
     /**
@@ -156,13 +156,13 @@ class LogInActivity : AppCompatActivity() {
     private fun requestReadWritePermissions() {
         val permissions = arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.INTERNET
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
         if (!hasReadWritePermissions()) {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE_PERMISSIONS)
         }
     }
+
     /**
      * Checks if the email or password fields are empty and shows appropriate messages.
      * @return true if any of the fields are empty, false otherwise
