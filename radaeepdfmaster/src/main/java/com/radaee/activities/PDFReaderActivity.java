@@ -398,12 +398,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private final View.OnClickListener undoClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (m_modified){
-                sPDFView.PDFSetInk(1);
-                sPDFView.PDFSetEditbox(1);
-                sPDFView.PDFSetInk(0);
-                UpdateImageButtons();
-            }
             if (sPDFView.PDFCanUndo()){
                 sPDFView.PDFUndo();
             }else{
