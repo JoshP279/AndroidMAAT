@@ -59,32 +59,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!--        <ImageButton-->
-        <!--            android:id="@+id/bookMarkButton"-->
-        <!--            android:layout_width="50dp"-->
-        <!--            android:layout_height="50dp"-->
-        <!--            android:layout_marginStart="10dp"-->
-        <!--            android:layout_marginTop="10dp"-->
-        <!--            android:layout_marginEnd="30dp"-->
-        <!--            android:background="@drawable/bookmark"-->
-        <!--            android:contentDescription="@string/bookmark_add"-->
-        <!--            android:scaleType="fitCenter"-->
-        <!--            app:layout_constraintStart_toEndOf="@+id/redoButton"-->
-        <!--            app:layout_constraintTop_toTopOf="parent" />-->
-
-
-        <!--        <ImageButton-->
-        <!--            android:id="@+id/commentButton"-->
-        <!--            android:layout_width="50dp"-->
-        <!--            android:layout_height="50dp"-->
-        <!--            android:layout_marginStart="10dp"-->
-        <!--            android:layout_marginTop="10dp"-->
-        <!--            android:layout_marginEnd="30dp"-->
-        <!--            android:background="@drawable/typed"-->
-        <!--            android:contentDescription="@string/save"-->
-        <!--            android:scaleType="fitCenter"-->
-        <!--            app:layout_constraintTop_toTopOf="parent" />-->
-
         <ImageButton
             android:id="@+id/typedAnnotButton"
             android:layout_width="50dp"

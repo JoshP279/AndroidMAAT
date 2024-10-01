@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.radaee.pdf.Page;
 import com.radaee.viewlib.R;
@@ -69,17 +70,7 @@ public class UIAnnotMenu {
 //        btn.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
-//                String annotationId = generateAnnotationId(m_annot);
-//                boolean isAdded = false;
-//                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-//                    isAdded = Boolean.TRUE.equals(annotationStateMap.getOrDefault(annotationId, false));
-//                }
-//                if (!isAdded) {
-//                    annotationStateMap.put(annotationId, true);
-//                    annotHashSet.add(m_callback);
-//                }
-//                int size = annotHashSet.size();
-//                Toast.makeText(m_view.getContext(), size + "", Toast.LENGTH_SHORT).show();
+//
 //            }
 //        });
 //        btn = m_view.findViewById(R.id.btn_annot_edit);

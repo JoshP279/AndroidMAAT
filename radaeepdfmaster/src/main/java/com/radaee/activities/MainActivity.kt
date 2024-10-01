@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                     alertDialog.setMessage(R.string.view_website_msg)
                     alertDialog.setPositiveButton(R.string.confirm) { dialog, which ->
                         val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-                        intent.data = android.net.Uri.parse("http://10.0.0.107:4200")
+                        intent.data = android.net.Uri.parse("https://15sdgt4p-4200.euw.devtunnels.ms")
                         startActivity(intent)
                     }
 

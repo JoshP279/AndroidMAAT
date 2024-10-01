@@ -1,7 +1,6 @@
 package com.radaee.activities;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -22,7 +21,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
-import com.radaee.annotui.UIAnnotMenu;
 import com.radaee.comm.Global;
 import com.radaee.dataclasses.SubmissionsResponse;
 import com.radaee.objects.FileUtil;
@@ -33,12 +31,10 @@ import com.radaee.pdf.Document;
 import com.radaee.pdf.Page;
 import com.radaee.pdfmaster.R;
 import com.radaee.reader.PDFEditLayoutView;
-import com.radaee.util.BookmarkHandler;
 import com.radaee.util.CommonUtil;
 import com.radaee.view.IPDFLayoutView;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 /**
  * PDFReaderActivity displays both the submission and the memo side by side.
@@ -117,9 +113,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         saveButton = findViewById(R.id.saveButton);
         pdfHelper = findViewById(R.id.pdfHelper);
         pdfHelper.setOnClickListener(v -> displayHelperDialog());
-
-//        commentButton = findViewById(R.id.commentButton);
-//        bookmarkButton = findViewById(R.id.bookMarkButton);
         keyboardButton = findViewById(R.id.typedAnnotButton);
         prevSubmissionButton = findViewById(R.id.btnPrevSubmission);
         nextSubmissionButton = findViewById(R.id.btnNextSubmission);
@@ -131,8 +124,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         undoButton.setOnClickListener(undoClickListener);
         redoButton.setOnClickListener(redoClickListener);
         saveButton.setOnClickListener(saveClickListener);
-//        bookmarkButton.setOnClickListener(bookmarkClickListener);
-//        commentButton.setOnClickListener(commentsClickListener);
         prevSubmissionButton.setEnabled(currentPos == 0);
         nextSubmissionButton.setVisibility(currentPos == filteredSubmissions.size() - 1 ? View.INVISIBLE : View.VISIBLE);
         setupDivider();
@@ -446,29 +437,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     };
 
     /**
-     * bookmarkClickListener is the OnClickListener for the bookmarkButton.
-     * When the bookmarkButton is clicked, the current page is bookmarked.
-     * If the bookmark is added successfully, a success message is displayed.
-     * If the bookmark already exists, a message is displayed.
-     * If the bookmark is not added successfully, an error message is displayed.
-     */
-    private final View.OnClickListener bookmarkClickListener = v -> {
-        int page = m_cur_page;
-        BookmarkHandler.BookmarkStatus status = BookmarkHandler.addToBookmarks(sFilePath, page, getString(R.string.bookmark_label, m_cur_page + 1));
-        AlertDialog.Builder builder = new AlertDialog.Builder(PDFReaderActivity.this);
-        builder.setTitle(R.string.notification_label);
-        if (status == BookmarkHandler.BookmarkStatus.SUCCESS) {
-            builder.setMessage(R.string.message_add_bookmark_success_label);
-        } else if (status == BookmarkHandler.BookmarkStatus.ALREADY_ADDED) {
-            builder.setMessage(R.string.message_bookmark_exist_label);
-        } else {
-            builder.setMessage(R.string.message_bookmark_error_label);
-        }
-        builder.setPositiveButton(R.string.button_ok_label, (dialog, which) -> dialog.dismiss());
-        builder.create().show();
-    };
-
-    /**
      * textClickListener is the OnClickListener for the textButton.
      * Allows a user to input typed annotations, rather than stylus input
      */
@@ -486,46 +454,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             texted = !texted;
         }
     };
-    /**
-     * commentsClickListener is the OnClickListener for the commentsButton
-     * Allows a user to reuse common annotations across assessments
-     */
-    private final View.OnClickListener commentsClickListener = v -> {
-        if (!UIAnnotMenu.annotHashSet.isEmpty()) {
-            // Create a list to hold the annotations as strings
-            List<String> annotationsList = new ArrayList<>();
-            List<UIAnnotMenu.IMemnuCallback> callbackList = new ArrayList<>(UIAnnotMenu.annotHashSet);
-
-            // Iterate over the HashSet and format the annotations
-            for (UIAnnotMenu.IMemnuCallback callback : callbackList) {
-                // Assuming each callback has a unique identifier or description
-                String annotationInfo = callback.toString(); // Replace with appropriate method to get annotation details
-                annotationsList.add(annotationInfo);
-            }
-
-            // Convert the list to an array
-            String[] annotationsArray = annotationsList.toArray(new String[0]);
-
-            // Build and display the AlertDialog
-            new AlertDialog.Builder(v.getContext())
-                    .setTitle("Annotations")
-                    .setItems(annotationsArray, (dialog, which) -> {
-                        UIAnnotMenu.IMemnuCallback selectedCallback = callbackList.get(which);
-                        sPDFView.PDFSetAnnot(null, m_cur_page);
-                    })
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                    .show();
-        } else {
-            // Show a message if the HashSet is empty
-            new AlertDialog.Builder(v.getContext())
-                    .setTitle("Annotations")
-                    .setMessage("No annotations found.")
-                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                    .show();
-        }
-    };
-
-
 
     /**
      * All the below methods are overridden from the IPDFLayoutView.PDFLayoutListener interface.
@@ -677,9 +605,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
             case R.id.action_menu:
                 CommonUtil.showBothPDFOutlines(sPDFView,mPDFView, this);
                 break;
-//            case R.id.action_book_mark:
-//                BookmarkHandler.showBookmarks(this, sFilePath, pageno -> {sPDFView.PDFGotoPage(pageno);});
-//                break;
             case R.id.action_setInProgress:
                 RetrofitClient.INSTANCE.updateSubmission(this,findViewById(android.R.id.content), submissionID,assessmentID,totalMarks,"In Progress", submissionFolderName, markingStyle);
                 break;

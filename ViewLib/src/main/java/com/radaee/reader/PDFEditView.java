@@ -3310,9 +3310,9 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
         {
             m_status = STA_INK;
             m_ink = new Ink(Global.g_ink_width, Global.g_ink_color);
-            lastInk = m_ink.clone();
         } else if (code == 1)//end
         {
+            if (m_ink != null) lastInk = m_ink.clone();
             m_status = STA_NONE;
             if (m_annot_page != null) {
                 Page page = m_doc.GetPage(m_annot_page.GetPageNo());
@@ -3327,8 +3327,8 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                     m_layout.gl_render(m_annot_page);
                     requestRender();
                     page.Close();
-                    if (m_listener != null)
-                        m_listener.OnPDFPageModified(m_annot_page.GetPageNo());
+//                    if (m_listener != null)
+//                        m_listener.OnPDFPageModified(m_annot_page.GetPageNo());
                 }
             }
             if (m_ink != null) m_ink.Destroy();
@@ -3345,6 +3345,9 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
         }
     }
     public void PDFSetAnnot(Ink ink, int pagenum) {
+
+        m_ink = (ink != null) ? ink : lastInk.clone();
+        PDFSetInk(1);
         m_ink = (ink != null) ? ink : lastInk.clone();
         m_status = STA_NONE;
 
@@ -3362,7 +3365,7 @@ public class PDFEditView extends GLSurfaceView implements PDFEditCanvas.CanvasLi
                 Log.d("PDFSetAnnot", "Matrix created for ink transformation");
 
                 // Additional debugging information for transformation
-                if (mat != null && m_ink != null) {
+                if (m_ink != null) {
                     mat.TransformInk(m_ink);
                     Log.d("PDFSetAnnot", "Ink transformed using matrix");
 
