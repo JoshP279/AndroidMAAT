@@ -5,20 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/assessmentsHelper"
-        android:layout_width="70dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginEnd="10dp"
-        android:background="@drawable/border"
-        android:gravity="center"
-        android:includeFontPadding="false"
-        android:text="\?"
-        android:textSize="48sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <SearchView
         android:id="@+id/assessmentSearchView"
         android:layout_width="0dp"
@@ -28,7 +14,7 @@
         android:layout_marginEnd="10dp"
         android:iconifiedByDefault="false"
         android:queryHint="Search assessments"
-        app:layout_constraintEnd_toStartOf="@+id/assessmentsHelper"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

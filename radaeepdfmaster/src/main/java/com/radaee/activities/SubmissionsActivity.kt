@@ -3,10 +3,9 @@ package com.radaee.activities
 import android.content.Intent
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -22,6 +21,7 @@ import com.radaee.adapters.SubmissionsAdapter
 import com.radaee.comm.Global
 import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.decorators.EqualSpaceItemDecoration
+import com.radaee.interfaces.HelpHandler
 import com.radaee.objects.FileUtil
 import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
@@ -34,7 +34,7 @@ import java.io.File
  * This activity displays the submissions for a particular assessment.
  * When a submission is clicked, the user is taken to the PDFReaderActivity where they can view the submission and memo PDFs.
  */
-class SubmissionsActivity : AppCompatActivity(){
+class SubmissionsActivity : AppCompatActivity(), HelpHandler{
     /**
      * The companion object contains the filtered submissions and the current position of the submission clicked.
      * This is used to ensure that the correct submission is opened in the PDFReaderActivity.
@@ -51,7 +51,6 @@ class SubmissionsActivity : AppCompatActivity(){
     private  var submissions = ArrayList<SubmissionsResponse>()
     private var filteredSubmissions = ArrayList<SubmissionsResponse>()
     lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var submissionsHelper: TextView
     private lateinit var filterSpinner: Spinner
     private var submissionPDF: Document? = null
     private var memoPDF: Document? = null
@@ -65,7 +64,6 @@ class SubmissionsActivity : AppCompatActivity(){
         swipeRefreshLayout = findViewById(R.id.submissionsSwipeRefresh)
         filterSpinner = findViewById(R.id.filterSpinner)
         submissionsAssessmentNameTextView = findViewById(R.id.submissionsAssessmentNameTextView)
-        submissionsHelper = findViewById(R.id.submissionsHelper)
         //Obtaining information from previous activity
         val intent = intent
         assessmentName = intent.getStringExtra("assessmentName").toString()
@@ -78,11 +76,6 @@ class SubmissionsActivity : AppCompatActivity(){
             RetrofitClient.loadSubmissions(this,findViewById(android.R.id.content), assessmentID, submissions, filteredSubmissions, submissionsRecyclerView)
             swipeRefreshLayout.isRefreshing = false
         }
-
-        submissionsHelper.setOnClickListener{
-            displayHelperDialog()
-        }
-
         setUpRecyclerView()
         setUpSearchView()
         setUpFilterSpinner()
@@ -141,7 +134,7 @@ class SubmissionsActivity : AppCompatActivity(){
     /**
      * This function displays a dialog box with a message to help the user understand the purpose of the submissions activity.
      */
-    private fun displayHelperDialog() {
+    override fun displayHelperDialog() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(R.string.helperHeading)
         builder.setMessage(R.string.submissionsHelperMessage)
@@ -151,8 +144,18 @@ class SubmissionsActivity : AppCompatActivity(){
         alertDialog.show()
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_help -> {
+                displayHelperDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        return false
+        menuInflater.inflate(R.menu.menu_help, menu)
+        return true
     }
 
     /**

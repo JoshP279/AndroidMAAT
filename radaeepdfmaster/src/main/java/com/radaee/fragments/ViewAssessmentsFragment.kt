@@ -17,6 +17,7 @@ import com.radaee.activities.SubmissionsActivity
 import com.radaee.adapters.AssessmentsAdapter
 import com.radaee.dataclasses.AssessmentResponse
 import com.radaee.decorators.EqualSpaceItemDecoration
+import com.radaee.interfaces.HelpHandler
 import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
@@ -25,10 +26,9 @@ import java.io.File
 /**
  * ViewAssessmentsFragment is a fragment that displays a list of assessments that the marker is assigned to.
  */
-class ViewAssessmentsFragment : Fragment() {
+class ViewAssessmentsFragment : Fragment(), HelpHandler {
     private lateinit var assessmentsList: RecyclerView
     private lateinit var adapter: AssessmentsAdapter
-    private lateinit var assessmentHelper: TextView
     private var assessments = ArrayList<AssessmentResponse>()
     private var filteredAssessments = ArrayList<AssessmentResponse>()
     private lateinit var searchView: SearchView
@@ -44,12 +44,7 @@ class ViewAssessmentsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         assessmentsList = view.findViewById(R.id.assessmentsRecyclerView)
         searchView = view.findViewById(R.id.assessmentSearchView)
-        assessmentHelper = view.findViewById(R.id.assessmentsHelper)
         swipeRefreshLayout = view.findViewById(R.id.assessmentsSwipeRefresh)
-
-        assessmentHelper.setOnClickListener {
-            displayHelperDialog()
-        }
 
         swipeRefreshLayout.setOnRefreshListener {
             RetrofitClient.loadAssessments(requireContext(),requireView(), assessments,filteredAssessments,assessmentsList)
@@ -58,11 +53,10 @@ class ViewAssessmentsFragment : Fragment() {
         setUpRecyclerView()
         setUpSearchView()
     }
-
     /**
      * Displays a dialog that provides information on how to use the assessments fragment.
      */
-    private fun displayHelperDialog() {
+    override fun displayHelperDialog() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.helperHeading)
         builder.setMessage(R.string.assessmentsHelperMessage)

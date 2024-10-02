@@ -4,6 +4,13 @@
     tools:context=".PDFReaderAct">
 
     <item
+        android:id="@+id/action_help"
+        android:title="\?"
+        android:icon="@drawable/ic_help"
+        android:contentDescription="Help"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_view_mode"
         android:icon="@drawable/ic_view2"
         android:orderInCategory="100"

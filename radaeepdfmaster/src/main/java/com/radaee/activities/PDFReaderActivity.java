@@ -78,13 +78,10 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
     private ImageButton undoButton;
     private ImageButton redoButton;
     private ImageButton saveButton;
-    private ImageButton bookmarkButton;
-    private ImageButton commentButton;
     private ImageButton keyboardButton;
     private TextView studentNum;
     private ImageButton nextSubmissionButton;
     private ImageButton prevSubmissionButton;
-    private TextView pdfHelper;
     private String studentNumber;
     private int submissionID;
     private int assessmentID;
@@ -111,8 +108,6 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         undoButton = findViewById(R.id.undoButton);
         redoButton = findViewById(R.id.redoButton);
         saveButton = findViewById(R.id.saveButton);
-        pdfHelper = findViewById(R.id.pdfHelper);
-        pdfHelper.setOnClickListener(v -> displayHelperDialog());
         keyboardButton = findViewById(R.id.typedAnnotButton);
         prevSubmissionButton = findViewById(R.id.btnPrevSubmission);
         nextSubmissionButton = findViewById(R.id.btnNextSubmission);
@@ -617,6 +612,9 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                 if (handleBackPressed()) {
                     return true;
                 }
+                break;
+            case R.id.action_help:
+                displayHelperDialog();
                 break;
         }
         return super.onOptionsItemSelected(item);

@@ -16,15 +16,15 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.radaee.activities.LogInActivity
+import com.radaee.interfaces.HelpHandler
 import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
 import com.radaee.pdfmaster.R
 
-class SettingsFragment : Fragment() {
+class SettingsFragment : Fragment(), HelpHandler {
 
     private lateinit var themeSwitch: Switch
     private lateinit var markingChoiceSpinner: Spinner
-    private lateinit var settingsHelper: TextView
     private lateinit var logoutBtn: Button
     private var isFirstSelection = true
 
@@ -35,16 +35,11 @@ class SettingsFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_settings, container, false)
         themeSwitch = view.findViewById(R.id.theme_switch)
         markingChoiceSpinner = view.findViewById(R.id.markingstyle_spinner)
-        settingsHelper = view.findViewById(R.id.settingsHelper)
         logoutBtn = view.findViewById(R.id.btnLogout)
 
         logoutBtn.setOnClickListener {
             logOut()
         }
-        settingsHelper.setOnClickListener {
-            displayHelperDialog()
-        }
-
         setUpTheme()
         setUpMarkingChoiceSpinner()
 
@@ -128,7 +123,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun displayHelperDialog() {
+    override fun displayHelperDialog() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle(R.string.helperHeading)
         builder.setMessage(R.string.settingsHelperMessage)

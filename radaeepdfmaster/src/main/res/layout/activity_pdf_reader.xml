@@ -85,19 +85,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/pdfHelper"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="5dp"
-        android:foreground="@drawable/border"
-        android:gravity="center"
-        android:includeFontPadding="false"
-        android:text="\?"
-        android:textSize="48sp"
-        app:layout_constraintStart_toEndOf="@+id/linearLayout"
-        app:layout_constraintTop_toTopOf="parent" />
     <View
         android:id="@+id/divider"
         android:layout_width="15dp"

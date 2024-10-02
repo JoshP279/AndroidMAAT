@@ -3,6 +3,7 @@ package com.radaee.activities
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
+import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import com.radaee.fragments.AboutFragment
 import com.radaee.fragments.HelpFragment
 import com.radaee.fragments.SettingsFragment
 import com.radaee.fragments.ViewAssessmentsFragment
+import com.radaee.interfaces.HelpHandler
 import com.radaee.pdfmaster.R
 
 /*
@@ -41,7 +43,8 @@ class MainActivity : AppCompatActivity() {
             navView.setCheckedItem(R.id.nav_assessments)
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        //
+        //add supportactionbarcode here
+
         navView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.nav_assessments -> supportFragmentManager.beginTransaction()
@@ -74,6 +77,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_help, menu) // Inflate the menu with the question mark
+        return true
+    }
     /**
      * This method is called when the user selects an item from the navigation drawer.
      */
@@ -81,7 +88,18 @@ class MainActivity : AppCompatActivity() {
         if (toggle.onOptionsItemSelected(item)) {
             return true
         }
-        return super.onOptionsItemSelected(item)
+
+        return when (item.itemId) {
+            R.id.action_help -> {
+                // Pass the help click event to the current fragment
+                val currentFragment = supportFragmentManager.findFragmentById(R.id.content_frame)
+                if (currentFragment is HelpHandler) {
+                    currentFragment.displayHelperDialog()
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     /**

@@ -12,6 +12,8 @@ import android.provider.Settings
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -37,7 +39,6 @@ class LogInActivity : AppCompatActivity() {
     private lateinit var emailEditText: EditText
     private lateinit var passwordEditText: EditText
     private lateinit var headingTextView: TextView
-    private lateinit var loginHelper: TextView
 
     companion object {
         private const val REQUEST_CODE_PERMISSIONS = 1001
@@ -53,10 +54,6 @@ class LogInActivity : AppCompatActivity() {
         emailEditText = findViewById(R.id.loginEmail)
         passwordEditText = findViewById(R.id.loginPassword)
         headingTextView = findViewById(R.id.headingTxtView)
-        loginHelper = findViewById(R.id.loginHelper)
-        loginHelper.setOnClickListener {
-            displayHelperDialog()
-        }
         //Highlights the first letter of the heading in blue color
         val spannableString = SpannableString(headingTextView.text)
         val colorSpan = ForegroundColorSpan(resources.getColor(R.color.colorPrimary, null))
@@ -80,6 +77,20 @@ class LogInActivity : AppCompatActivity() {
         checkSavedLogin()
         checkAndRequestPermissions()
     }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_help -> {
+                displayHelperDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_help, menu)
+        return true
+    }
+
     /**
      * Displays a dialog box with a message that helps the user understand how to log in.
      */

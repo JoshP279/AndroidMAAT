@@ -63,11 +63,16 @@ class SubmissionsAdapter(private val mList: List<SubmissionsResponse>, private v
         holder.bind(item)
 
         if (SharedPref.getBoolean(context, "OFFLINE_MODE", false)) {
+            holder.statusImageView.visibility = View.INVISIBLE
+            holder.statusTextView.visibility = View.INVISIBLE
             if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 holder.submissionsSurnameTextView.maxWidth = 1000
             }else{
                 holder.submissionsSurnameTextView.maxWidth = 600
             }
+        }else{
+            holder.statusImageView.visibility = View.VISIBLE
+            holder.statusTextView.visibility = View.VISIBLE
         }
     }
 
