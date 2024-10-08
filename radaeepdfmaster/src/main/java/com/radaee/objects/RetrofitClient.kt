@@ -45,7 +45,7 @@ object RetrofitClient{
      * YOU MUST CHANGE THE IP ADDRESS TO THE IP ADDRESS THAT THE SERVER AND THE DEVICE IS CONNECTED TO IN ORDER TO WORK
      * DO NOT CHANGE PORT NUMBER, ONLY THE IP ADDRESS
      */
-    private const val BASE_URL = "http://10.0.0.107:3000"
+    private const val BASE_URL = "http://10.0.0.107:8080"
     val api: API by lazy {//
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -80,9 +80,12 @@ object RetrofitClient{
                         SharedPref.saveBoolean(context,"OFFLINE_MODE",false)
                         context.startActivity(intent)
                         (context as LogInActivity).finish()
+                    }else{
+                        SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.invalid_username_or_password), context)
                     }
-                } else {
-                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.invalid_username_or_password), context)
+                }
+                else {
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
                 }
             }
             override fun onFailure(call: Call<LogInResponse>, t: Throwable) {

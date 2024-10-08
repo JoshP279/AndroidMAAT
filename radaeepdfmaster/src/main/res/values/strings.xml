@@ -190,4 +190,6 @@
     <string name="pdfhelper_message">This section allows you to mark submissions. If you are unsure about any of the actions in the stylus toolbar, simply click and hold on a button to see its function. You can also resize the middle bar to adjust the view between the submission and the memorandum according to your preference.</string>
     <string name="view_website">View Website</string>
     <string name="view_website_msg">Are you sure you want to visit the website? (This will open the website in a browser)</string>
+    <string name="permission_required_title">Application Permissions Denied</string>
+    <string name="permission_required_message">This application requires various permissions to function. Please accept them in order to use the application.</string>
 </resources>

@@ -238,11 +238,35 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
                     default -> nextPos;
                 };
             if (nextPos != -1) {
-                OnPDFBlankTapped(m_cur_page); //if an annotation is in focus, remove focus and open next PDF
-                currentPos = nextPos;
-                updatePrevAndNextButtons();
-                SubmissionsResponse submission = filteredSubmissions.get(currentPos);
-                openSubmission(submission);
+                if (m_modified && mPDFDoc.CanSave()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle(R.string.notification_label);
+                    builder.setMessage(R.string.notification_save_label);
+                    final int finalNextPos = nextPos;
+                    builder.setPositiveButton(R.string.button_positive_label, (dialog, which) -> {
+                        if (sPDFView.PDFCanSave()) {
+                            sPDFView.PDFSetInk(1);
+                            sPDFView.PDFSetEditbox(1);
+                            sPDFView.PDFSave();
+                        }
+                        currentPos = finalNextPos;
+                        updatePrevAndNextButtons();
+                        SubmissionsResponse submission = filteredSubmissions.get(currentPos);
+                        openSubmission(submission);
+                    });
+                    builder.setNegativeButton(R.string.button_negative_label, (dialog, which) -> {
+                        dialog.dismiss();
+                    });
+                    builder.setNeutralButton(R.string.button_cancel_label, (dialog, which) -> {
+                        dialog.dismiss();
+                    });
+                    builder.create().show();
+                }else{
+                    currentPos = nextPos;
+                    updatePrevAndNextButtons();
+                    SubmissionsResponse submission = filteredSubmissions.get(currentPos);
+                    openSubmission(submission);
+                }
             }
         }
     };
@@ -358,6 +382,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
         int err1 = sPDFDoc.Open(sPath, null);
 //        int err2 = mPDFDoc.Open(mPath, null);
         if (err1 == 0) {
+            m_modified = false;
             sPDFView.PDFOpen(sPDFDoc, PDFReaderActivity.this);
             if (m_cur_page >= 0 && m_cur_page <= sPDFView.PDFGetDoc().GetPageCount()) {
                 sPDFView.PDFGotoPage(m_cur_page);
