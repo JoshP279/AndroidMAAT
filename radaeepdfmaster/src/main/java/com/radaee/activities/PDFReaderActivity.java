@@ -383,6 +383,7 @@ public class PDFReaderActivity extends AppCompatActivity implements IPDFLayoutVi
 //        int err2 = mPDFDoc.Open(mPath, null);
         if (err1 == 0) {
             m_modified = false;
+            sPDFView.PDFEndAnnot();
             sPDFView.PDFOpen(sPDFDoc, PDFReaderActivity.this);
             if (m_cur_page >= 0 && m_cur_page <= sPDFView.PDFGetDoc().GetPageCount()) {
                 sPDFView.PDFGotoPage(m_cur_page);
