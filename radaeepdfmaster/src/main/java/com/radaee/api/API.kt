@@ -6,6 +6,7 @@ import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SingleResponse
 import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.dataclasses.UpdateMarkingStyleRequest
+import com.radaee.dataclasses.UpdatePasswordRequest
 import com.radaee.dataclasses.UpdateSubmissionMarkRequest
 import com.radaee.dataclasses.UpdateSubmissionRequest
 import okhttp3.MultipartBody
@@ -112,6 +113,11 @@ interface API {
     @PUT("/updateSubmissionMark")
     fun updateSubmissionMark(
         @Body request: UpdateSubmissionMarkRequest
+    ): Call<SingleResponse>
+
+    @PUT("/updatePassword")
+    fun updatePassword(
+        @Body request: UpdatePasswordRequest
     ): Call<SingleResponse>
 
 }

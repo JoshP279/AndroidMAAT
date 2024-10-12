@@ -11,10 +11,11 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.Switch
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.radaee.activities.LogInActivity
 import com.radaee.interfaces.HelpHandler
 import com.radaee.objects.RetrofitClient
@@ -26,6 +27,7 @@ class SettingsFragment : Fragment(), HelpHandler {
     private lateinit var themeSwitch: Switch
     private lateinit var markingChoiceSpinner: Spinner
     private lateinit var logoutBtn: Button
+    private lateinit var changePasswordBtn: Button
     private var isFirstSelection = true
 
     override fun onCreateView(
@@ -36,9 +38,19 @@ class SettingsFragment : Fragment(), HelpHandler {
         themeSwitch = view.findViewById(R.id.theme_switch)
         markingChoiceSpinner = view.findViewById(R.id.markingstyle_spinner)
         logoutBtn = view.findViewById(R.id.btnLogout)
+        changePasswordBtn = view.findViewById(R.id.btnChangePassword)
 
+        if (SharedPref.getBoolean(requireContext(), "OFFLINE_MODE", false)){
+            changePasswordBtn.visibility = View.INVISIBLE
+        }else{
+            changePasswordBtn.visibility = View.VISIBLE
+        }
         logoutBtn.setOnClickListener {
             logOut()
+        }
+
+        changePasswordBtn.setOnClickListener{
+            showChangePasswordDialog()
         }
         setUpTheme()
         setUpMarkingChoiceSpinner()
@@ -157,6 +169,86 @@ class SettingsFragment : Fragment(), HelpHandler {
             SharedPref.saveBoolean(requireContext(), "DARK_MODE", isChecked)
         }
     }
+    /**
+     * Function to display the Change Password dialog
+     */
+    private fun showChangePasswordDialog() {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_change_password, null)
+        val currentPasswordLayout = dialogView.findViewById<TextInputLayout>(R.id.layoutCurrentPassword)
+        val newPasswordLayout = dialogView.findViewById<TextInputLayout>(R.id.layoutNewPassword)
+        val confirmPasswordLayout = dialogView.findViewById<TextInputLayout>(R.id.layoutConfirmPassword)
+
+        val currentPasswordEditText = dialogView.findViewById<TextInputEditText>(R.id.etCurrentPassword)
+        val newPasswordEditText = dialogView.findViewById<TextInputEditText>(R.id.etNewPassword)
+        val confirmPasswordEditText = dialogView.findViewById<TextInputEditText>(R.id.etConfirmPassword)
+
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        dialogBuilder.setView(dialogView)
+            .setTitle("Change Password")
+            .setPositiveButton("Change", null)  // Set null initially to prevent auto-dismiss
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+
+        val dialog = dialogBuilder.create()
+
+        // Set custom click listener for the "Change" button to handle validation
+        dialog.setOnShowListener {
+            val changeButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            changeButton.setOnClickListener {
+                val currentPassword = currentPasswordEditText.text.toString()
+                val newPassword = newPasswordEditText.text.toString()
+                val confirmPassword = confirmPasswordEditText.text.toString()
+
+                // Clear previous errors
+                currentPasswordLayout.error = null
+                newPasswordLayout.error = null
+                confirmPasswordLayout.error = null
+
+                // Retrieve stored password and email from Shared Preferences
+                val savedPassword = SharedPref.getString(requireContext(), "password", null)
+                val markerEmail = SharedPref.getString(requireContext(), "email", null) ?: ""
+
+                // Validate current password
+                if (savedPassword != currentPassword) {
+                    currentPasswordLayout.error = "This password is incorrect!"
+                    return@setOnClickListener  // Prevent dialog from closing
+                }
+
+                // Validate new password and confirmation match
+                if (newPassword != confirmPassword) {
+                    confirmPasswordLayout.error = "Passwords do not match!"
+                    return@setOnClickListener  // Prevent dialog from closing
+                }
+
+                // Validate new password length
+                if (newPassword.length < 6) {
+                    newPasswordLayout.error = "Password must be at least 6 characters long!"
+                    return@setOnClickListener  // Prevent dialog from closing
+                }
+
+                RetrofitClient.updatePassword(
+                    requireContext(),
+                    requireView(),
+                    markerEmail,
+                    newPassword,
+                    dialog
+                )
+            }
+        }
+        dialog.show()
+    }
+
+    /**
+     * Helper function to show a simple message dialog
+     */
+    private fun showMessage(message: String) {
+        AlertDialog.Builder(requireContext())
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
 
     private fun logOut() {
         val intent = Intent(requireContext(), LogInActivity::class.java)

@@ -90,11 +90,11 @@
     <string name="log_in">Log In</string>
     <string name="assessments">Assessments</string>
     <string name="helperHeading">What does this screen do?</string>
-    <string name="assessmentsHelperMessage">This screen displays the assessments that you are able to mark. Only the assessments that you have been added as a marker will be displayed.</string>
+    <string name="assessmentsHelperMessage">This screen displays the assessments that you are able to mark. Only the assessments that you have been added to as a marker will be displayed.</string>
     <string name="logInHelperMessage">Log in with your university credentials (email and password) to proceed. Offline marking will allow you to assess previously downloaded scripts</string>
     <string name="aboutHelperMessage">This screen displays some basic information about MAAT.</string>
     <string name="helpHelperMessage">This screen displays some basic information about every screen throughout the app Look at the top right corner if you are unsure about the purpose of the screen you are currently on.</string>
-    <string name="settingsHelperMessage">This screen displays some of the settings you can change to customise the app to your liking. Try switching themes, changing the language, and selecting your marking style.</string>
+    <string name="settingsHelperMessage">This screen displays some of the settings you can change to customise the app to your liking. Try switching themes or selecting your marking style.</string>
     <string name="home">Home</string>
     <string name="view_assessments">View Assessments</string>
     <string name="settings">Settings</string>
@@ -125,15 +125,23 @@
     <string name="submissions_marked">%d marked</string>
     <string name="ok">Ok</string>
     <string name="about_header">About This App</string>
-    <string name="about_message">This app is designed to streamline the process of managing submissions and assessments. It offers an intuitive interface for tracking, marking, and reviewing submissions in a centralized platform.</string>
+    <string name="about_message">
+    This app is designed to improve the efficiency of submission annotation and enhance the overall marking experience. With an intuitive interface that ensures ease of use and consistency, it caters to both novice and experienced users. The app supports simultaneous access for multiple users and incorporates robust security measures, ensuring that only authorized users can assess submissions. Optimized for Android tablets (API Level 29 and above), it includes stylus support and works seamlessly in both portrait and landscape modes, with light and dark theme options.
+    </string>
     <string name="key_features_heading">Key Features</string>
-    <string name="key_features_description">• Easy tracking of submissions\n• Marking and reviewing capabilities\n• User-friendly interface</string>
+    <string name="key_features_description">
+        • Download and assess submissions directly on your device\n
+        • Digital marking with symbol recognition (e.g., ✓) for automated scoring\n
+        • Freeform annotations with the ability to save and reuse comments\n
+        • Bookmark functionality for question-by-question marking\n
+        • Track and store awarded marks for each assessment
+        </string>
     <string name="about_dev_heading">About the Developer</string>
-    <string name="about_dev_description">This app was developed by Joshua Page under the supervision of Marinda Taljaard. Our goal is to create efficient and user-friendly applications to improve productivity and streamline workflows.</string>
+    <string name="about_dev_description">This app was developed by Joshua Page under the supervision of Marinda Taljaard. Our goal is to create efficient and user-friendly experience that can enhance the e-assessment process and remove the drawbacks associated with traditional assessment.</string>
     <string name="contact_us_heading">Contact Us</string>
     <string name="contact_us_description">For support or inquiries, please contact the developer at s224046136@mandela.ac.za.</string>
     <string name="version_heading">Version History</string>
-    <string name="version_description">V1.00-Adriaan Wildervanck\nV2.00-Logan Fleur\nV3.00-Kupelo\nV4.00-Joshua Page</string>
+    <string name="version_description">V1.00-Adriaan Wildervanck\\nV2.00-Kupelo\nV3.00-Logan Fleur\nV4.00-Joshua Page</string>
     <string name="theme">Theme</string>
     <string name="marking_style">Marking Style</string>
     <string name="memorandum">Memorandum</string>
@@ -174,10 +182,10 @@
     <string name="memo_downloaded">Memo downloaded successfully!</string>
     <string name="pdf_downloaded">Submission PDF downloaded successfully!</string>
     <string name="button_explainer">What does this button do?</string>
-    <string name="undo_explainer">This is the undo button. Clicking this will undo your last annotation action</string>
+    <string name="undo_explainer">This is the undo button. Tapping this will undo your last annotation action</string>
     <string name="redo_explainer">This button will redo any of the last annotations you have removed or undone.</string>
     <string name="save_explainer">This will save your annotations to the PDF document. Make sure you save before setting the submission as marked!</string>
-    <string name="ink_explainer">This button activates the annotation mode. The first click allows you to make annotations using a stylus, and the second click finalizes your input and exits the annotation mode.</string>
+    <string name="ink_explainer">This button activates the annotation mode. The first tap allows you to make annotations using a stylus, and the second tap finalizes your input and exits the annotation mode.</string>
     <string name="text_explainer">This button will allow you to type out comments.</string>
     <string name="pdf_reader_help_header">Assess Submissions</string>
     <string name="pdfreader_help_text">This activity allows you to assess submissions. Try long pressing each of the buttons in the stylus bar if you are unsure of what they do.</string>
@@ -187,9 +195,10 @@
     <string name="mark_updated">Successfully edited submission mark</string>
     <string name="mark_update_fail">Failed to edit submission mark</string>
     <string name="invalid_mark">Invalid mark. Please enter a valid number between 0 and 100.</string>
-    <string name="pdfhelper_message">This section allows you to mark submissions. If you are unsure about any of the actions in the stylus toolbar, simply click and hold on a button to see its function. You can also resize the middle bar to adjust the view between the submission and the memorandum according to your preference.</string>
+    <string name="pdfhelper_message">This section allows you to mark submissions. If you are unsure about any of the actions in the stylus toolbar, simply tap and hold on a button to see its function. You can also resize the middle bar to adjust the view between the submission and the memorandum according to your preference.</string>
     <string name="view_website">View Website</string>
     <string name="view_website_msg">Are you sure you want to visit the website? (This will open the website in a browser)</string>
     <string name="permission_required_title">Application Permissions Denied</string>
     <string name="permission_required_message">This application requires various permissions to function. Please accept them in order to use the application.</string>
+    <string name="assessments_help_header">Assessments</string>
 </resources>

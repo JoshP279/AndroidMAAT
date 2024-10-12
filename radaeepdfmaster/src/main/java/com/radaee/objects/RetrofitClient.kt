@@ -1,5 +1,6 @@
 package com.radaee.objects
 
+import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
@@ -17,6 +18,7 @@ import com.radaee.dataclasses.PDFResponse
 import com.radaee.dataclasses.SingleResponse
 import com.radaee.dataclasses.SubmissionsResponse
 import com.radaee.dataclasses.UpdateMarkingStyleRequest
+import com.radaee.dataclasses.UpdatePasswordRequest
 import com.radaee.dataclasses.UpdateSubmissionMarkRequest
 import com.radaee.dataclasses.UpdateSubmissionRequest
 import com.radaee.pdfmaster.R
@@ -72,20 +74,26 @@ object RetrofitClient{
                 if (response.isSuccessful) {
                     val resp = response.body()
                     if (resp?.MarkerRole.equals("Lecturer") || resp?.MarkerRole.equals("Demi")) {
-                        SharedPref.saveString(context,"email", email)
-                        SharedPref.saveString(context,"password", password)
-                        if (resp?.MarkingStyle != null) SharedPref.saveString(context, "marking_style", resp.MarkingStyle)
-                        else SharedPref.saveString(context, "marking_style", context.getString(R.string.marking_style1)) //default marking style, most people are right handed
+                        SharedPref.saveString(context, "email", email)
+                        SharedPref.saveString(context, "password", password)
+                        if (resp?.MarkingStyle != null) SharedPref.saveString(
+                            context,
+                            "marking_style",
+                            resp.MarkingStyle
+                        )
+                        else SharedPref.saveString(
+                            context,
+                            "marking_style",
+                            context.getString(R.string.marking_style1)
+                        ) //default marking style, most people are right handed
                         val intent = Intent(context, MainActivity::class.java)
-                        SharedPref.saveBoolean(context,"OFFLINE_MODE",false)
+                        SharedPref.saveBoolean(context, "OFFLINE_MODE", false)
                         context.startActivity(intent)
                         (context as LogInActivity).finish()
-                    }else{
-                        SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.invalid_username_or_password), context)
                     }
                 }
                 else {
-                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.invalid_username_or_password), context)
                 }
             }
             override fun onFailure(call: Call<LogInResponse>, t: Throwable) {
@@ -411,4 +419,23 @@ object RetrofitClient{
             }
         })
     }
+    fun updatePassword(context: Context, rootView: View, markerEmail: String, password: String, dialog: androidx.appcompat.app.AlertDialog){
+        api.updatePassword(UpdatePasswordRequest(markerEmail, password)).enqueue(object : Callback<SingleResponse>{
+            override fun onResponse(call: Call<SingleResponse>, response: Response<SingleResponse>) {
+                if (response.isSuccessful) {
+                    SharedPref.saveString(context,"password", password)
+                    SnackbarUtil.showSuccessSnackBar(rootView, context.getString(R.string.mark_updated), context)
+                } else {
+                    SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.mark_update_fail), context)
+                }
+                dialog.dismiss()
+            }
+            override fun onFailure(call: Call<SingleResponse>, t: Throwable) {
+                t.printStackTrace()
+                dialog.dismiss()
+                SnackbarUtil.showErrorSnackBar(rootView, context.getString(R.string.server_connect_fail), context)
+            }
+        })
+    }
+
 }
