@@ -21,7 +21,6 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.TypedArrayUtils.getResourceId
 import androidx.recyclerview.widget.RecyclerView
 import com.radaee.activities.SubmissionsActivity
 import com.radaee.dataclasses.SubmissionsResponse

@@ -1,14 +1,8 @@
 package com.radaee.activities
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
@@ -20,13 +14,11 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.radaee.objects.RegexUtils
 import com.radaee.objects.RetrofitClient
 import com.radaee.objects.SharedPref
-import com.radaee.pdfmaster.R
 import com.radaee.objects.SnackbarUtil
+import com.radaee.pdfmaster.R
 
 /**
  * LogInActivity is the first activity that is launched when the app is opened.

@@ -2,7 +2,6 @@ package com.radaee.adapters
 
 import android.app.ProgressDialog
 import android.content.Context
-import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.MenuItem
