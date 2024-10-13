@@ -47,7 +47,7 @@ object RetrofitClient{
      * YOU MUST CHANGE THE IP ADDRESS TO THE IP ADDRESS THAT THE SERVER AND THE DEVICE IS CONNECTED TO IN ORDER TO WORK
      * DO NOT CHANGE PORT NUMBER, ONLY THE IP ADDRESS
      */
-    private const val BASE_URL = "http://10.0.0.107:8080"
+    const val BASE_URL = "http://10.0.0.107:8080"
     val api: API by lazy {//
         Retrofit.Builder()
             .baseUrl(BASE_URL)

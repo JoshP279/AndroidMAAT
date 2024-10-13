@@ -2,7 +2,9 @@ package com.radaee.activities
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -14,6 +16,7 @@ import com.radaee.fragments.HelpFragment
 import com.radaee.fragments.SettingsFragment
 import com.radaee.fragments.ViewAssessmentsFragment
 import com.radaee.interfaces.HelpHandler
+import com.radaee.objects.RetrofitClient
 import com.radaee.pdfmaster.R
 
 /*
@@ -61,7 +64,18 @@ class MainActivity : AppCompatActivity() {
                     alertDialog.setMessage(R.string.view_website_msg)
                     alertDialog.setPositiveButton(R.string.confirm) { dialog, which ->
                         val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-                        intent.data = android.net.Uri.parse("http://10.0.0.107:4200/login")
+                        val baseUrl = RetrofitClient.BASE_URL
+                        val uri = Uri.parse(baseUrl)
+
+                        val uriWithoutPort = uri.buildUpon()
+                            .encodedAuthority(uri.host)
+                            .build()
+
+                        val finalUri = uriWithoutPort.buildUpon()
+                            .encodedAuthority("${uri.host}:4200") // Re-add host with the new port, without encoding the colon
+                            .build()
+                        Log.e("check", finalUri.toString())
+                        intent.data = finalUri
                         startActivity(intent)
                     }
 
